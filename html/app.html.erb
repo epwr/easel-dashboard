@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>
+      <%= $config[:title] %>
+    </title>
+  </head>
+  <body>
+    <div class="command-selector">
+      <% $config[:commands].each do |command| %>
+        <div class="command">
+          <%= command %>
+        </div>
+      <% end %>
+    </div>
+    <div class="interface">
+      This will be the interface!
+    </div>
+  </body>
+</html>
