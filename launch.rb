@@ -21,11 +21,11 @@ $config = {
   log_file: STDOUT,       # Default logging to STDOUT
   title: 'CDash - A Custom Dashboard for Your Server!',
   colours: {
-    surface: '\#222222',
-    background: '\#000000',
-    accent: '\#007f7f',
-    on_background: '\#ffffff',
-    on_surface: '\#ffffff'
+    surface: '#222222',
+    background: '#000000',
+    accent: '#007f7f',
+    on_background: '#ffffff',
+    on_surface: '#ffffff'
   },
   commands: [
       {
@@ -120,12 +120,15 @@ end
 # overwrite_config
 #
 # Overwrites the $config fields that are set in the YAML file provided on input.
-# Log Warnings on every key in the YAML file that does not exist in $config.
+# TODO: Log (error?) every key in the YAML file that does not exist in $config.
 def overwrite_config yaml_filename
 
   # TODO: Rewrite using pattern matching to allow checking if the
   # yaml_contents.each is one of the base keys. If so, check that the associated
   # value matches the expected nesting. Do that 'no other values' check.
+
+  # TODO: Ensure that the command names are less than 1020 bytes (because I'm
+  # setting the max length of a single websocket message to 1024 (minus 'STOP:'))
 
   begin
     yaml_contents = YAML.load_file $config[:yaml_file]
@@ -135,16 +138,18 @@ def overwrite_config yaml_filename
 
   def loop_overwrite (config, yaml)
     yaml.each_key { |key|
-      if config[key.to_sym]
         if yaml[key].is_a? Hash
           loop_overwrite(config[key.to_sym], yaml[key])
+        elsif yaml[key].is_a? Array
+            config[key.to_sym] = []
+            yaml[key].each { |elmnt|
+              element = {}
+              loop_overwrite(element, elmnt)
+              config[key.to_sym] << element
+            }
         else
           config[key.to_sym] = yaml[key]
         end
-      else
-        # TODO: find a way to log the line (in YAML) that this is from.
-        log_warning "Key:value in #{$config[:yaml_file]} ignored (because it wasn't recognized): #{key}:#{yaml[key]}"
-      end
     }
   end
 

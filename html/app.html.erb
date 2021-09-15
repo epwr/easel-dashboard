@@ -5,17 +5,58 @@
     <title>
       <%= $config[:title] %>
     </title>
+    <link rel="stylesheet" href="/app.css">
+    <script type="text/javascript">
+        let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
+        let cur_command = null;
+        let keep_pane_contents = false;
+
+        ws_socket.onmessage = (event) => {
+          pane = document.getElementById('output-pane');
+          if (keep_pane_contents)
+            pane.innerHTML += event.data;
+          else {
+            pane.innerHTML = event.data;
+            keep_pane_contents = true;
+          }
+        }
+
+        function load_interface(cmd_name){
+          pane = document.getElementById('output-pane');
+          pane.innerHTML = "Launching '" + cmd_name + "'...";
+          keep_pane_contents = false;
+        }
+
+        function run_command(cmd_name) {
+          ws_socket.send("RUN:" + cmd_name);
+          load_interface(cmd_name)
+          cur_command = cmd_name;
+        }
+
+
+    </script>
   </head>
   <body>
-    <div class="command-selector">
-      <% $config[:commands].each do |command| %>
-        <div class="command">
-          <%= command %>
+    <div class="screen">
+      <div class="cmd-picker">
+
+        <% $config[:commands].each do |command| %>
+          <div class="command" onclick="run_command('<%= command[:name]%>')">
+            <h2><%= command[:name] %></h2>
+            <p>
+              <%= command[:desc] %>
+            </p>
+          </div>
+        <% end %>
+      </div>
+      <div class="interface">
+        <div class="card surface">
+          <h2 class="padded-bottom">Output:</h2>
+          <div class="background card scroll-content">
+            <pre class="output-pane" id="output-pane">Click a command to run it.</pre>
+          </div>
         </div>
-      <% end %>
-    </div>
-    <div class="interface">
-      This will be the interface!
+      </div>
     </div>
   </body>
 </html>

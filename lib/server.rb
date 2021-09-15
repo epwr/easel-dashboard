@@ -8,6 +8,7 @@
 # Imports
 require 'socket'
 require_relative './build_pages.rb'
+require_relative './websocket'
 
 
 def launch_server
@@ -24,15 +25,14 @@ def launch_server
   # Main Loop
   begin
     loop {                           # Servers run forever
-    Thread.start(server.accept) do |client|
-      handle_request client
+      Thread.start(server.accept) do |client|
+        handle_request client
     end
   }
 
   # Handle shutting down.
   rescue Interrupt
     log_info "Interrupt received, server shutting down..."
-    children.each { |child| child.exit }
   end
 end
 
@@ -40,45 +40,75 @@ end
 def handle_request socket
 
   log_info "Receieved request: #{socket}"
-  message = socket.eat_buffer
+  request = read_HTTP_message socket
 
-  response = build_app
+  # TODO: check what the minimum allow handling is. I think there's one more method I need to handle.
+  case request[:method]
+  when "GET"
+    # TODO: respond with app, css file, favicon, or 404 error.
+    if request[:fields][:Upgrade] == "websocket\r\n"
+      run_websocket(socket, request)
+    else
+        handle_get(socket, request)
+    end
+  #when "HEAD"
+    # TODO: Deal with HEAD request. https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4
+  else
+    # TODO: respond with an appropriate error.
+    response "I don't understand what you sent - go away."
+    socket.print "HTTP/1.1 200 OK\r\n" +
+                 "Content-Type: text/plain\r\n" +
+                 "Content-Length: #{response.bytesize}\r\n" +
+                 "Connection: close\r\n" +
+                 "\r\n" +
+                 response
+    socket.close
+  end
 
-  # We need to include the Content-Type and Content-Length headers
-  # to let the client know the size and type of data
-  # contained in the response. Note that HTTP is whitespace
-  # sensitive, and expects each header line to end with CRLF (i.e. "\r\n")
-  socket.print "HTTP/1.1 200 OK\r\n" +
-               "Content-Type: text/plain\r\n" +
-               "Content-Length: #{response.bytesize}\r\n" +
-               "Connection: close\r\n"
-
-  # Print a blank line to separate the header from the response body,
-  # as required by the protocol.
-  socket.print "\r\n"
-
-  # Print the actual response body, which is just "Hello World!\n"
-  socket.print response
-
-  # Close the socket, terminating the connection
-  socket.close
 end
 
 
-# Monkey patch in a nice eat_buffer method.
-class TCPSocket
 
-  def eat_buffer
-    contents = ''
-    buffer = ''
-    begin
-    loop {
-      recv_nonblock(256, 0, buffer)
-      contents += buffer
-    }
-    rescue IO::EAGAINWaitReadable
-      contents
+# handle_get
+#
+# Handle a get request.
+def handle_get(socket, request)
+
+  case request[:url]
+  when "/", "/index.html"
+    socket.print build_app
+    socket.close
+  when "/app.css"
+    socket.print build_css
+    socket.close
+  else
+    socket.print build_error 404
+    socket.close
+  end
+
+end
+
+
+# read_HTTP_message
+#
+# Read an HTTP message from the socket, and parse it into a request Hash.
+def read_HTTP_message socket
+  message = []
+  loop do
+    line = socket.gets
+    message << line
+    if line == "\r\n"
+      break
     end
   end
 
+
+  request = {fields: {}}
+  (request[:method], request[:url], request[:protocol]) = message[0].split(" ")
+
+  message[1..].each{ |line|
+    (key, value) = line.split(": ")
+    request[:fields][key.split("-").join("_").to_sym] = value
+  }
+  request
 end

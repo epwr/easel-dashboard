@@ -6,21 +6,47 @@ via the dashboard. Use a YAML file to completely configure the dashboard includi
 the commands that it can run; the colours, title, and logo of the page; the host
 and port to bind to, encryption defaults, and more.
 
-## Roadmap
+*CDash Version:* v0.1
 
-_Note_: This roadmap is for my mental 'what should I do next', and not a promise
-of upcoming features. This may change at any point.
+## A Roadmap?
 
-  - *v0.1: The MVP*
-      - Build a websocket to let the dashboard show the results of running the command.
-      - Finish the ERB files for the app and css.
-      - Add HTML parsing to serve the app, css, and favicon.
-  - *v0.2: YAML Validation (because silent errors suck)*
-      - YAML validation (check that all fields are valid, error on invalid fields).
-      - YAML Errors include line number from the YAML file.
-  - *v0.3: A pretty client-side*
-      - Client-side parsing of some websocket information. Allow for common
+CDash is still in its infancy, so there's much more to come! Below are a list of
+features that I want to release, and a sequence for which features come next.
+
+*Note:* No part of this roadmap is a promise. This is just my current plan.
+
+  - *v0.1: The Beta-- RELEASED*
+      - Basic functions.
+      - Parsing YAML can overwrite default config values.
+      - Commands are run, then stdout is sent to webpage (via websocket)
+      - _Note:_ While this is usable, it's not pretty and the features are well
+        below an MVP.
+  - *v0.2: Updating output*
+      - Make the server stream the output to the client as it's produced (allow
+        for a long running program like `top`).
+      - Have the client-side output include STDOUT and STDERR. These are shown as
+        different colours on the client.
+      - Have Client accepts a "clear" command to allow the output to be completely
+        refreshed.
+  - *v0.3: Easy Install*
+      - Let CDash be installed via one command. Possibly as a ruby gem, possibly
+        with some other package manager, possibly with an install script.
+  - *v0.4: YAML Validation (because silent errors suck)*
+      - Add YAML validation (check that all fields are valid, error on invalid fields).
+      - Ensure YAML Errors include line number from the YAML file.
+  - *v0.5: A pretty client-side*
+      - Add client-side parsing of some websocket information. Allow for common
         commands (eg. top) to be parsed into attractive graphics.
-      - Client-side differentiation between STDOUT and STDERR (colour?) messages
-  - *v0.4: Encryption Prescription*
+  - *v0.6: Encryption Prescription*
       - Add in encryption to all communication.
+  - *v0.7: Authentication Computation*
+      - Add the ability to sign-in to the dashboard.
+  - *v0.8: UI Rework*
+      - Create a UI that can be used on Mobile.
+      - Make the UI look half decent.
+      - Create a logo for CDash (have it be the default logo on the dashboard)
+  - *v1.0: Hello World!*
+      - Likely includes a rename to align with a domain name that I can actually get.
+      - Build a release testing pipeline
+      - Implement a Major-Minor-Patch versioning system.
+      - _Note:_ This is the point where I would consider CDash to be an MVP.
