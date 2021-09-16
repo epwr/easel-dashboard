@@ -30,14 +30,9 @@ in `~/.gem/bin/` so if you're having any errors, add that to your PATH.
 
 ## Notes About the Current State
 
-CDash is now on v0.3! At this point, it works. The UX is marginally acceptable,
-and the UI is at a point that is ugly, but it's clear what things are meant to do
-and hopefully its clear where the UI is headed. It still needs a lot of work though.
-
-Next step (v0.4) is figuring out a system for easy installation. Once that's done,
-then CDash can actually be used on real systems (wild), so I'm adding documentation
-to the roadmap. To start, documentation will be focused on how to use CDash instead
-of on documenting the code base.
+CDash is now on v0.4! At this point, it works! While the UI/UX is not polished,
+and there's lots of features that I want to add before I think of CDash as a fully
+functioning prototype, you can easily install and run it on any server you want!
 
 ## A Roadmap?
 
@@ -65,7 +60,7 @@ features that I want to release, and a sequence for which features come next.
       - Change the UI so that's it's actually acceptable.
       - Add some more configuration values around UI colours (eg. stdout colour,
         stderr colour).
-  - *v0.4: Easy Install*
+  - *v0.4: Easy Install -- RELEASED*
       - Let CDash be installed via one command. Possibly as a ruby gem, possibly
         with some other package manager, possibly with an install script.
   - *v0.5: Documentation for Users*
