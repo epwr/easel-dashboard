@@ -14,6 +14,20 @@ client does is request the server run the code associated with an ID number. The
 the server streams the output of that command back to the client. This provides a
 high level of security - even in v0.1 where there is no authentication or encryption.
 
+## Installation
+
+CDash is distributed as a Ruby gem, so you can install it with:
+
+    gem install cdash
+
+And then you can run it with:
+
+    cdash path/to/custom.yml
+
+The most common issue with this style of installation is that `gem` does not always
+expose the gems that you install to your PATH. Usually gem installs the executables
+in `~/.gem/bin/` so if you're having any errors, add that to your PATH.
+
 ## Notes About the Current State
 
 CDash is now on v0.3! At this point, it works. The UX is marginally acceptable,
