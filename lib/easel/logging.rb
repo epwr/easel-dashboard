@@ -3,7 +3,7 @@
 # Author: Eric Power
 #
 # Description:
-#     Provides the functions to provide easy logging for the cdash project.
+#     Provides the functions to provide easy logging for the Easel Dashboard.
 
 # Imports
 require 'time'

@@ -14,7 +14,7 @@ $config = {
   port: 4200,             # Default port
   hostname: 'localhost',  # Default hostname
   log_file: STDOUT,       # Default logging to STDOUT
-  title: 'CDash - A Custom Dashboard for Your Server!',
+  title: 'Easel - Your Custom Dashboard',
   colours: {
     surface:        '#222222',
     background:     '#000000',

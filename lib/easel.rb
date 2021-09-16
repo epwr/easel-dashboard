@@ -3,22 +3,22 @@
 # Author: Eric Power
 #
 # Description:
-#     Cdash turns a YAML file into a custom dashboard. See docs/configuration for
+#     Easel Dashboard turns a YAML file into a custom dashboard. See docs/configuration for
 #     a description of how to set up the YAML file.
 
 # Imports
 require 'optparse'
 require 'yaml'
 
-require_relative 'cdash/logging'
-require_relative 'cdash/server'
-require_relative 'cdash/configuration'
+require_relative 'easel/logging'
+require_relative 'easel/server'
+require_relative 'easel/configuration'
 
 # launch
 #
-# Launches the CDash server. Check the $config variable for defaults, although
-# everything can be overridden by either the YAML file or the command line
-# arguments.
+# Launches the Easel Dashboard. Check the $config variable for defaults, although
+# everything can be overridden by the YAML file (and some by the command line
+# arguments).
 def launch
 
   parse_ARGV

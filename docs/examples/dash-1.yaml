@@ -1,4 +1,4 @@
-title: 'CDash - A title from a .Yaml file'
+title: 'Easel Dashabord'
 
 commands:
   - name: 'Print Msg'

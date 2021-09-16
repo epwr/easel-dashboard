@@ -3,7 +3,7 @@
 # Author: Eric Power
 #
 # Description:
-#     Provides the server that serves Cdash.
+#     Provides the server that serves Easel Dashboard.
 
 # Imports
 require 'socket'

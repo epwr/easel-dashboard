@@ -7,27 +7,8 @@
 #     that I'm implementing/creating has a max frame size of MAX_WS_FRAME_SIZE
 #     bytes.
 #
-#     Incoming frames are either RUN:XXXXXXXXX or STOP:XXXXXXXXX where XXXXXXXXX
-#     is the command's name. Outgoing frames contain a message of the form
-#     ID:XXXXXXXXX where XXXXXXXXX is output given to the frame called ID.
-#
 # Note: Websocket code is based on the code provided in the following article:
 # https://www.honeybadger.io/blog/building-a-simple-websockets-server-from-scratch-in-ruby/
-
-# Goals for v0.2:
-#     - Client only updates with current program messages.
-#     - Client tells server to stop running old programs.
-#     - Client differentiates between STDOUT and STDERR output.
-#
-# Plan for v0.2:
-#     - When building server, assign an ID to each CMD.
-#     - Server:
-#       - Send ID:OUT:XXXXX, ID:ERR:XXXXX, or ID:CLEAR.
-#     - Client:
-#       - Send RUN:ID, STOP:ID.
-#
-# Stretch Goal:
-#     - Allow Client to keep receiving multiple different streams.
 
 
 # Imports
