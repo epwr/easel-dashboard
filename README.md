@@ -18,6 +18,7 @@ high level of security - even in v0.1 where there is no authentication or encryp
 
 I'm realeasing v0.2 because it does what it's supposed to do (according to my
 roadmap)! That said, there's a couple really annoying UX experiences:
+
     - clicking on the name of the command does not run the command (it just
       loads the command's currently stored output).
     - There's no way of knowing which command is currently being shown.
