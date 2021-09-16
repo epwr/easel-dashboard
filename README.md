@@ -1,28 +1,28 @@
-# cdash
+# Easel Dashboard
 
-*Current CDash Version:* v0.4
+Easel dashboard is the easiest dashboard to set up, and the easiest dashboard to
+customize. With a one line install thanks to Ruby gems (see
+[Installation](## Installation)), and pre-built YAML files to edit, you can be up
+and running in moments.
 
-CDash lets you generate and serve a custom dashboard from any server using a
-single command. The dashboard runs commands on the server and displays the result
-via the dashboard. Use a YAML file to completely configure the dashboard including
-the commands that it can run; the colours, title, and logo of the page; the host
-and port to bind to, encryption defaults, and more.
+Easel lets you choose what you see. From which commands you can run from
+your dashboard, to which metrics you can see, everything can be customized
+by editing a YAML file.
 
-CDash is unlikely to allow any foreign code execution, because it doesn't run any
-code from the client. Instead, code is set up locally - in a YAML file - and all
-client does is request the server run the code associated with an ID number. Then
-the server streams the output of that command back to the client. This provides a
-high level of security - even in v0.1 where there is no authentication or encryption.
+At no point are you at risk of foreign code execution, because Easel only runs
+commands from the YAML file that is hosted on your server. The web client just
+passes a command ID over the web socket, so your server is safe - even without
+encryption and authentication.
 
 ## Installation
 
-CDash is distributed as a Ruby gem, so you can install it with:
+Easel dashboard is distributed as a Ruby gem, so you can install it with:
 
-    gem install cdash
+    gem install easel-dashboard
 
 And then you can run it with:
 
-    cdash path/to/custom.yml
+    easel path/to/custom.yml
 
 The most common issue with this style of installation is that `gem` does not always
 expose the gems that you install to your PATH. Usually gem installs the executables
@@ -30,13 +30,13 @@ in `~/.gem/bin/` so if you're having any errors, add that to your PATH.
 
 ## Notes About the Current State
 
-CDash is now on v0.4! At this point, it works! While the UI/UX is not polished,
-and there's lots of features that I want to add before I think of CDash as a fully
+Easel is currently v0.4! At this point, it works! While the UI/UX is not polished,
+and there's lots of features that I want to add before I think of Easel as a fully
 functioning prototype, you can easily install and run it on any server you want!
 
 ## A Roadmap?
 
-CDash is still in its infancy, so there's much more to come! Below are a list of
+Easel is still in its infancy, so there's much more to come! Below are a list of
 features that I want to release, and a sequence for which features come next.
 
 *Note:* No part of this roadmap is a promise. This is just my current plan.
@@ -61,7 +61,7 @@ features that I want to release, and a sequence for which features come next.
       - Add some more configuration values around UI colours (eg. stdout colour,
         stderr colour).
   - *v0.4: Easy Install -- RELEASED*
-      - Let CDash be installed via one command. Possibly as a ruby gem, possibly
+      - Let Easel be installed via one command. Possibly as a ruby gem, possibly
         with some other package manager, possibly with an install script.
   - *v0.5: A Real Dashboard*
       - Add in a default 'dashboard' page that shows common stats about the server
@@ -70,7 +70,7 @@ features that I want to release, and a sequence for which features come next.
       - Add client-side parsing of some websocket information. Allow for common
         commands (eg. top) to be parsed into attractive graphics.
   - *v0.6: Documentation for Users*
-      - Add documentation on how to install CDash, and how to use it. This includes
+      - Add documentation on how to install Easel, and how to use it. This includes
         examples of YAML files, and explanations of the different YAML fields that are
         accepted.
   - *v0.7: YAML Validation (because silent errors suck)*
@@ -83,11 +83,11 @@ features that I want to release, and a sequence for which features come next.
   - *v0.10: UI Rework*
       - Create a UI that can be used on Mobile.
       - Make the UI look half decent.
-      - Create a logo for CDash (have it be the default logo on the dashboard)
+      - Create a logo for Easel (have it be the default logo on the dashboard)
   - *v0.11: Download logs*
       - A button to download the output of a given command.
   - *v1.0: Hello World!*
-      - CDash goes out into the world! The expectation is that all the
+      - Easel goes out into the world! The expectation is that all the
         functionality is completed in the v0.X releases - v1.0 is focused on
         handling technical debt. This almost certainly involves a refactor, and
         will take on cleaning up the TODOs in the code base (which mostly involve
