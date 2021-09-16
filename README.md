@@ -75,9 +75,11 @@ features that I want to release, and a sequence for which features come next.
   - *v0.10: Download logs*
       - A button to download the output of a given command.
   - *v1.0: Hello World!*
-      - This release is focused on handling technical debt. This almost certainly
-        involves a refactor, and will take on cleaning up the TODOs in the code
-        base (which mostly involve gracefully handling edge cases).
+      - CDash goes out into the world! The expectation is that all the
+        functionality is completed in the v0.X releases - v1.0 is focused on
+        handling technical debt. This almost certainly involves a refactor, and
+        will take on cleaning up the TODOs in the code base (which mostly involve
+        gracefully handling edge cases).
       - The refactor will involve the following (unless a refactor of these
         systems happens before v1.0):
         - The websocket should not be the controller for server-run code. Core
@@ -88,11 +90,9 @@ features that I want to release, and a sequence for which features come next.
           be handled elsewhere.
         - The Javascript should probably be broken out of the app.hmtl.erb file,
           into it's own file.
-        -
       - Likely includes a rename to align with a domain name that I can actually get.
       - Build a release testing pipeline
       - Implement a Major-Minor-Patch versioning system.
-      - _Note:_ This is the point where I would consider CDash to be an MVP.
 
 ## Other Possible Features
 
