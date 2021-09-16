@@ -63,16 +63,19 @@ features that I want to release, and a sequence for which features come next.
   - *v0.4: Easy Install -- RELEASED*
       - Let CDash be installed via one command. Possibly as a ruby gem, possibly
         with some other package manager, possibly with an install script.
-  - *v0.5: Documentation for Users*
+  - *v0.5: A Real Dashboard*
+      - Add in a default 'dashboard' page that shows common stats about the server
+        such as CPU usage, network usage, memory usage, uptime, and maybe
+        some maximums (and minimums) of those.
+      - Add client-side parsing of some websocket information. Allow for common
+        commands (eg. top) to be parsed into attractive graphics.
+  - *v0.6: Documentation for Users*
       - Add documentation on how to install CDash, and how to use it. This includes
         examples of YAML files, and explanations of the different YAML fields that are
         accepted.
-  - *v0.6: YAML Validation (because silent errors suck)*
+  - *v0.7: YAML Validation (because silent errors suck)*
       - Add YAML validation (check that all fields are valid, error on invalid fields).
       - Ensure YAML Errors include line number from the YAML file.
-  - *v0.7: Client-side can be graphs*
-      - Add client-side parsing of some websocket information. Allow for common
-        commands (eg. top) to be parsed into attractive graphics.
   - *v0.8: Encryption Prescription*
       - Add in encryption to all communication.
   - *v0.9: Authentication Computation*
