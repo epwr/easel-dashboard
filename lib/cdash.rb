@@ -10,9 +10,9 @@
 require 'optparse'
 require 'yaml'
 
-require_relative 'lib/logging'
-require_relative 'lib/server'
-require_relative 'lib/configuration'
+require_relative 'cdash/logging'
+require_relative 'cdash/server'
+require_relative 'cdash/configuration'
 
 # launch
 #

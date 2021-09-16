@@ -24,7 +24,7 @@ def launch_server
 
   # Main Loop
   begin
-    loop { 
+    loop {
       Thread.start(server.accept) do |client|
         handle_request client
     end
@@ -106,7 +106,7 @@ def read_HTTP_message socket
   request = {fields: {}}
   (request[:method], request[:url], request[:protocol]) = message[0].split(" ")
 
-  message[1..].each{ |line|
+  message[1..-1].each{ |line|
     (key, value) = line.split(": ")
     request[:fields][key.split("-").join("_").to_sym] = value
   }
