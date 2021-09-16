@@ -104,30 +104,51 @@
       <div class="cmd-picker">
 
         <% $config[:commands].each do |command| %>
-          <div class="command"
-               onclick="load_pane(<%=command[:id]%>)"
-               id="cmd-<%=command[:id]%>"
-               data-id="<%=command[:id]%>"
-               data-cmd="<%=command[:cmd]%>">
-            <h2><%= command[:name] %></h2>
-            <p>
-              <%= command[:desc] %>
-            </p>
-          </div>
-          <div class="command-icons">
-            <div class="cmd-icon"
+          <div class="command-box">
+            <div class="command-info"
+              onclick="load_pane(<%=command[:id]%>)"
+              id="cmd-<%=command[:id]%>"
+              data-id="<%=command[:id]%>"
+              data-cmd="<%=command[:cmd]%>">
+              <h2><%= command[:name] %></h2>
+              <p><%= command[:desc] %></p>
+            </div>
+            <div class="command-controls">
+              <div class="command-icon"
                 id="cmd-<%=command[:id]%>-run-icon"
-                 onclick="toggle_run(<%= command[:id] %>)">
-              Run
+                onclick="toggle_run(<%= command[:id] %>)">
+                Run
+              </div>
+              <div class="command-icon"
+                id="cmd-<%=command[:id]%>-log-icon"
+                onclick="console.log('Logging the output has not been implemented.')">
+                Log
+              </div>
             </div>
           </div>
         <% end %>
       </div>
-      <div class="interface">
-        <div class="card surface">
-          <h2 class="padded-bottom">Output:</h2>
-          <div class="background card scroll-content">
-            <pre class="output-pane" id="output-pane">Click a command to run it.</pre>
+      <div class="interface surface">
+        <div id="interface-title">
+          <span class="h2" id="interface-state">Waiting:</span>
+          <span id="interface-state-details"></span>
+        </div>
+        <div class="interface-output scroll-content">
+          <pre class="output-pane" id="output-pane">Click 'Run' to run a command and see it's output.
+
+Click 'Help' (below) to see more.</pre>
+        </div>
+        <div class="interface-footer">
+          <div class="interface-commands">
+            <div class="top-shadow"></div>
+            <div class="interface-button"
+              onclick="console.log('Help button has not been implemented.')">
+              Help
+            </div>
+            <div class="interface-button"
+              onclick="console.log('Save output button has not been implemented.')">
+              Save Output
+            </div>
           </div>
         </div>
       </div>

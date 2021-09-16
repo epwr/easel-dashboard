@@ -1,10 +1,11 @@
 html, body {
-    font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
+    --size-tiny:           5px;
     --size-small:           10px;
     --size-medium:          20px;
     --size-large:           40px;
@@ -12,14 +13,21 @@ html, body {
 
     --surface:              <%= $config[:colours][:surface] %>;
     --background:           <%= $config[:colours][:background] %>;
-    --accent:               <%= $config[:colours][:accent] %>;
+    --primary:              <%= $config[:colours][:primary] %>;
+    --secondary:            <%= $config[:colours][:secondary] %>;
     --on-background:        <%= $config[:colours][:on_background] %>;
     --on-surface:           <%= $config[:colours][:on_surface] %>;
+    --on-primary:           <%= $config[:colours][:on_primary] %>;
+    --on-secondary:         <%= $config[:colours][:on_secondary] %>;
+    --shadow:               <%= $config[:colours][:shadow] %>;
+    --stdout-colour:        <%= $config[:colours][:stdout_colour] %>;
+    --stderr-colour:        <%= $config[:colours][:stderr_colour] %>;
+
 
     --text-size-small:      12pt;
     --text-size:            14pt;
     --text-size-large:      18pt;
-    --text-size-x-large:    28pt;
+    --text-size-xlarge:    28pt;
 
     --text-weight:          300;
     --text-weight-semi-bold:450;
@@ -35,9 +43,13 @@ html, body {
     margin: 0;
     box-sizing: border-box;
 }
-span.stderr { color: var(--accent); }
+span.stderr { color: var(--stderr-colour); }
+span.stdout { color: var(--stdout-colour); }
 
-
+h1, .h1 {font-size: var(--text-size-xlarge); font-weight: var(--text-weight-bold);}
+h2, .h2 {font-size: var(--text-size-large); font-weight: var(--text-weight-bold);}
+h3, .h3 {font-size: var(--text-size-large); font-weight: var(--text-weight-semi-bold);}
+h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);}
 
 *{padding: 0; margin: 0;}
 
@@ -59,51 +71,134 @@ span.stderr { color: var(--accent); }
 }
 .cmd-picker .command:not(:last-child) {border-bottom: solid 1px var(--accent);}
 
-.command {
-  background-color: var(--surface);
-  color: var(--on-surface);
-  padding: var(--size-small);
+.command-box{
   display: flex;
   flex-direction: column;
+  background-color: var(--surface);
+  border-radius: var(--size-small);
+  align-items: stretch;
+  margin: var(--size-small);
+  overflow: hidden;
+}
+
+.command-info {
+  background-color: var(--surface);
+  color: var(--on-surface);
+  padding: var(--size-medium);
+  padding-bottom: var(--size-small);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-bottom: solid 1px var(--primary);
+  z-index: 3;
+  box-shadow: 0 0 var(--size-small) var(--shadow);
+  cursor: pointer;
+}
+.command-info:hover { color: var(--primary); }
+
+.command-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: baseline;
+  box-shadow: inset 0 var(--size-tiny) var(--size-small) #000000;
+}
+
+.command-icon {
+  flex-grow: 2;
+  text-align: center;
+  padding: var(--size-tiny);
+  background-color: var(--primary);
+  color: var(--on-primary);
+}
+.command-icon:hover {
+  background-color: var(--secondary);
+  color: var(--on-secondary);
   cursor: pointer;
 }
 
-.interface {
-  margin: var(--size-large);
-  flex-grow: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-  align-items: stretch;
-  overflow: hidden;
-}
-
-.card {
-  padding: var(--size-large);
-  flex-grow: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-  align-items: stretch;
-  overflow: hidden;
-
-}
-
-.surface{
-  background-color: var(--surface);
-  color: var(--on-surface);
-}
-
-.background{
+::-webkit-scrollbar {
+  width: var(--size-small);
+  height: var(--size-small);
   background-color: var(--background);
-  color: var(--on-background);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: var(--size-tiny);
+    border: solid 2px var(--background);
 }
 
-.padded-bottom { padding-bottom: var(--size-medium); }
 
-.scroll-content {
-  min-height: min-content;
-  overflow: auto;
+
+
+
+
+
+
+
+.interface {
+  /* margin: var(--size-large); */
+  flex-grow: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: var(--size-small);
+  padding: var(--size-medium);
+  margin: var(--size-small);
+}
+#interface-title {
+  padding-bottom: var(--size-medium);
+}
+.interface-output {
+  flex-grow: 2;
+  flex-basis: 0;
+  padding: var(--size-medium);
+  box-shadow: inset 0 0 var(--size-medium) var(--background);
+}
+.interface-footer{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding-top: var(--size-medium);
+}
+.interface-commands {
+  width: 33%;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  border-radius: var(--size-small);
+  overflow: hidden;
+}
+.interface-button {
+  flex-grow: 2;
+  flex-basis: 0;
+  flex-shrink: 2;
+  text-align: center;
+  padding: var(--size-tiny) var(--size-small);
+  background-color: var(--primary);
+  color: var(--on-primary);
+  overflow: hidden;
+}
+.interface-button:hover {
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+  cursor: pointer;
+}
+.top-shadow {
+  position: absolute;
+  width: 100%;
+  transform: translate(calc( -1 * var(--size-small)),calc( -1 * calc( var(--size-large))));
+  height: var(--size-large);
+  background-color: none;
+  z-index: 50;
+  box-shadow: 0 0 var(--size-small) var(--shadow);
 }
 
-.output-pane {max-width: calc(100vw - 320px - 6 * var(--size-large));}
+
+.surface{ background-color: var(--surface); color: var(--on-surface); }
+.background{ background-color: var(--background); color: var(--on-background); }
+
+.scroll-content { min-height: min-content; overflow: auto; }

@@ -12,35 +12,7 @@ require 'yaml'
 
 require_relative 'lib/logging'
 require_relative 'lib/server'
-
-# Global Variables
-$config = {
-  logging: 2,             # 0=Fatal, 1=Error, 2=Warning, 3=Info
-  port: 4200,             # Default port
-  hostname: 'localhost',  # Default hostname
-  log_file: STDOUT,       # Default logging to STDOUT
-  title: 'CDash - A Custom Dashboard for Your Server!',
-  colours: {
-    surface: '#222222',
-    background: '#000000',
-    accent: '#007f7f',
-    on_background: '#ffffff',
-    on_surface: '#ffffff'
-  },
-  commands: [
-      {
-        name: 'Test 1',
-        cmd:  'echo "this is the output of Test 1"',
-        desc: 'Simple output test #1'
-      },
-      {
-        name: 'Test 2',
-        cmd:  'echo "this is the output of Test 2"',
-        desc: 'Simple output test #2'
-      }
-  ]
-}
-
+require_relative 'lib/configuration'
 
 # launch
 #

@@ -24,7 +24,7 @@ def launch_server
 
   # Main Loop
   begin
-    loop {                           # Servers run forever
+    loop { 
       Thread.start(server.accept) do |client|
         handle_request client
     end
