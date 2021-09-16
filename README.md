@@ -1,6 +1,6 @@
 # cdash
 
-*Current CDash Version:* v0.2
+*Current CDash Version:* v0.3
 
 CDash lets you generate and serve a custom dashboard from any server using a
 single command. The dashboard runs commands on the server and displays the result
@@ -16,18 +16,14 @@ high level of security - even in v0.1 where there is no authentication or encryp
 
 ## Notes About the Current State
 
-I'm realeasing v0.2 because it does what it's supposed to do (according to my
-roadmap)! That said, there's a couple really annoying UX experiences:
+CDash is now on v0.3! At this point, it works. The UX is marginally acceptable,
+and the UI is at a point that is ugly, but it's clear what things are meant to do
+and hopefully its clear where the UI is headed. It still needs a lot of work though.
 
-    - clicking on the name of the command does not run the command (it just
-      loads the command's currently stored output).
-    - There's no way of knowing which command is currently being shown.
-
-Therefore, I'm changing the roadmap to make the next release focus on the UI/UX.
-This is also because I've got a UI design in my head at the moment that I'm
-excited about trying to realize - so this seems like a good time to switch into
-designer mode! All the subsequent releases get bumped up a number (and I added
-another release before v1.0 because it seemed to be needed).
+Next step (v0.4) is figuring out a system for easy installation. Once that's done,
+then CDash can actually be used on real systems (wild), so I'm adding documentation
+to the roadmap. To start, documentation will be focused on how to use CDash instead
+of on documenting the code base.
 
 ## A Roadmap?
 
@@ -49,7 +45,7 @@ features that I want to release, and a sequence for which features come next.
         different colours on the client.
       - Have Client accept a "clear" command to allow the output to be completely
         refreshed.
-  - *v0.3: UI/UX improvements!*
+  - *v0.3: UI/UX improvements! -- RELEASED*
       - Rehaul the UX around how selecting which command's output to show.
       - Let the user know which command's output is being shown.
       - Change the UI so that's it's actually acceptable.
@@ -58,21 +54,25 @@ features that I want to release, and a sequence for which features come next.
   - *v0.4: Easy Install*
       - Let CDash be installed via one command. Possibly as a ruby gem, possibly
         with some other package manager, possibly with an install script.
-  - *v0.5: YAML Validation (because silent errors suck)*
+  - *v0.5: Documentation for Users*
+      - Add documentation on how to install CDash, and how to use it. This includes
+        examples of YAML files, and explanations of the different YAML fields that are
+        accepted.
+  - *v0.6: YAML Validation (because silent errors suck)*
       - Add YAML validation (check that all fields are valid, error on invalid fields).
       - Ensure YAML Errors include line number from the YAML file.
-  - *v0.6: Client-side can be graphs*
+  - *v0.7: Client-side can be graphs*
       - Add client-side parsing of some websocket information. Allow for common
         commands (eg. top) to be parsed into attractive graphics.
-  - *v0.7: Encryption Prescription*
+  - *v0.8: Encryption Prescription*
       - Add in encryption to all communication.
-  - *v0.8: Authentication Computation*
+  - *v0.9: Authentication Computation*
       - Add the ability to sign-in to the dashboard.
-  - *v0.9: UI Rework*
+  - *v0.10: UI Rework*
       - Create a UI that can be used on Mobile.
       - Make the UI look half decent.
       - Create a logo for CDash (have it be the default logo on the dashboard)
-  - *v0.10: Download logs*
+  - *v0.11: Download logs*
       - A button to download the output of a given command.
   - *v1.0: Hello World!*
       - CDash goes out into the world! The expectation is that all the
@@ -92,6 +92,7 @@ features that I want to release, and a sequence for which features come next.
           into it's own file.
       - Likely includes a rename to align with a domain name that I can actually get.
       - Build a release testing pipeline
+      - Add documentation on the actual codebase to help future development.
       - Implement a Major-Minor-Patch versioning system.
 
 ## Other Possible Features
