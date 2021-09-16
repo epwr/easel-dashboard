@@ -53,10 +53,10 @@
               update_stream_content(id, msg);
               break;
             case "CLEAR":
-              console.log("Not Implemented. 1093")
+              streams[id]['content'] = "";
               break;
             case "FINISHED":
-              console.log("Not Implemented. 1075")
+              document.getElementById('cmd-' + id + '-run-icon').innerHTML = "Run";
               break;
             default:
               console.log("Error: Message not understood. Id: " + id + ", cmd_type: " + cmd_type + ", msg:" + msg);
