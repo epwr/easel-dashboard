@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="/app.css">
     <script type="text/javascript">
 
+        // v0.3 TODOS:
+        //    - UX stuff:
+        //        - clean up how the whole 'selecting the current pane works',
+        //        - have the pane show it's state.
+        //        - Add a help message.
+        //        - Add a 'clear' functionality (maybe the current LOG button?)
+        //        - Clicking 'Run' changes the current frame.
+        //    - I say I like design affordances, but I don't have anything clear
+        //      for how to change the current pane. I need to add a button or
+        //      something for this.
+
+
         // TODO: Add a RUN and STOP variable, that point to a div as a play button
         // or a square.
         let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
