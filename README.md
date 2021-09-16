@@ -1,6 +1,6 @@
 # cdash
 
-*Current CDash Version:* v0.3
+*Current CDash Version:* v0.4
 
 CDash lets you generate and serve a custom dashboard from any server using a
 single command. The dashboard runs commands on the server and displays the result
@@ -100,7 +100,7 @@ features that I want to release, and a sequence for which features come next.
         - The Javascript should probably be broken out of the app.hmtl.erb file,
           into it's own file.
       - Likely includes a rename to align with a domain name that I can actually get.
-      - Build a release testing pipeline
+      - Build a release pipeline
       - Add documentation on the actual codebase to help future development.
       - Implement a Major-Minor-Patch versioning system.
 
