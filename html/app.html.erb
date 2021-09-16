@@ -7,32 +7,95 @@
     </title>
     <link rel="stylesheet" href="/app.css">
     <script type="text/javascript">
-        let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
-        let cur_command = null;
-        let keep_pane_contents = false;
 
+        // TODO: Add a RUN and STOP variable, that point to a div as a play button
+        // or a square.
+        let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
+        let current_cmd = null;
+        let keep_pane_contents = false; // Remove default contents when you run a command.
+
+        let streams = { <%$config[:commands].each do |command|%>
+          <%= command[:id] %>: { is_running: false,  content: "" },<% end %>
+        };
+
+        // Receive message
         ws_socket.onmessage = (event) => {
+
           pane = document.getElementById('output-pane');
-          if (keep_pane_contents)
-            pane.innerHTML += event.data;
-          else {
-            pane.innerHTML = event.data;
+          console.log("Received: " + event.data);
+
+          // Clear pane if appropriate
+          if (!keep_pane_contents) {
+            pane.innerHTML = "";
             keep_pane_contents = true;
+          }
+
+          // Split message into [ID, CMD, MSG]
+          msg_frags = event.data.split(":");
+          id = msg_frags[0];
+          cmd_type = msg_frags[1];
+          msg = msg_frags.slice(2).join(":");
+
+
+          // Validate
+          if (!(id in streams) || !(["ERR", "OUT", "CLEAR", "FINISHED"].includes(cmd_type)) ) {
+            console.log("Error validating message: " + events.data);
+            return;
+          }
+
+          // Process message
+          switch (cmd_type) {
+            case "ERR":
+              console.log("Not Implemented. 4056")
+              update_stream_content(id, "<span class=\"stderr\">" + msg + "</span>");
+              break;
+            case "OUT":
+              update_stream_content(id, msg);
+              break;
+            case "CLEAR":
+              console.log("Not Implemented. 1093")
+              break;
+            case "FINISHED":
+              console.log("Not Implemented. 1075")
+              break;
+            default:
+              console.log("Error: Message not understood. Id: " + id + ", cmd_type: " + cmd_type + ", msg:" + msg);
           }
         }
 
-        function load_interface(cmd_name){
+        // update_stream_content
+        function update_stream_content(id, content){
+          console.log("Id: " + id + ", current_cmd: " + current_cmd + ", content: " + content);
+          streams[id]['content'] += content;
+          if(id == current_cmd) {
+            update_pane(id);
+          }
+        }
+
+        function toggle_run(id){
+          if (streams[id]['is_running']) { // STOP (already running)
+            ws_socket.send("STOP:" + id);
+            document.getElementById('cmd-' + id + '-run-icon').innerHTML = "Run";
+          } else { // RUN (currently not running)
+            streams[id]['content'] = "";
+            console.log("Trying to send: RUN:" + id);
+
+            ws_socket.send("RUN:" + id);
+            document.getElementById('cmd-' + id + '-run-icon').innerHTML = "Stop";
+            if (current_cmd == null) load_pane(id);
+          }
+          streams[id]['is_running'] = !streams[id]['is_running'];
+        }
+
+        function load_pane(id) {
+          update_pane(id);
+          current_cmd = id;
+        }
+
+        function update_pane(id) {
           pane = document.getElementById('output-pane');
-          pane.innerHTML = "Launching '" + cmd_name + "'...";
-          keep_pane_contents = false;
+          pane.innerHTML = streams[id]['content'];
         }
-
-        function run_command(cmd_name) {
-          ws_socket.send("RUN:" + cmd_name);
-          load_interface(cmd_name)
-          cur_command = cmd_name;
-        }
-
 
     </script>
   </head>
@@ -41,11 +104,22 @@
       <div class="cmd-picker">
 
         <% $config[:commands].each do |command| %>
-          <div class="command" onclick="run_command('<%= command[:name]%>')">
+          <div class="command"
+               onclick="load_pane(<%=command[:id]%>)"
+               id="cmd-<%=command[:id]%>"
+               data-id="<%=command[:id]%>"
+               data-cmd="<%=command[:cmd]%>">
             <h2><%= command[:name] %></h2>
             <p>
               <%= command[:desc] %>
             </p>
+          </div>
+          <div class="command-icons">
+            <div class="cmd-icon"
+                id="cmd-<%=command[:id]%>-run-icon"
+                 onclick="toggle_run(<%= command[:id] %>)">
+              Run
+            </div>
           </div>
         <% end %>
       </div>

@@ -14,8 +14,25 @@
 # Note: Websocket code is based on the code provided in the following article:
 # https://www.honeybadger.io/blog/building-a-simple-websockets-server-from-scratch-in-ruby/
 
+# Goals for v0.2:
+#     - Client only updates with current program messages.
+#     - Client tells server to stop running old programs.
+#     - Client differentiates between STDOUT and STDERR output.
+#
+# Plan for v0.2:
+#     - When building server, assign an ID to each CMD.
+#     - Server:
+#       - Send ID:OUT:XXXXX, ID:ERR:XXXXX, or ID:CLEAR.
+#     - Client:
+#       - Send RUN:ID, STOP:ID.
+#
+# Stretch Goal:
+#     - Allow Client to keep receiving multiple different streams.
+
+
 # Imports
 require 'digest'
+require 'open3'
 
 # Key Variables
 MAX_WS_FRAME_SIZE = 50.0
@@ -25,19 +42,30 @@ MAX_WS_FRAME_SIZE = 50.0
 #
 def run_websocket(socket, initial_request)
 
-  accept_connection( socket, initial_request[:fields][:Sec_WebSocket_Key][0..-3])
+  accept_connection(socket, initial_request[:fields][:Sec_WebSocket_Key][0..-3])
+  child_threads = {}
 
   loop {
     msg = receive_msg socket
-    break if msg.nil?
+    break if msg.nil? # The socket was closed by the client.
 
     case msg.split(":")[0]
     when "RUN"
-      cmd_name = msg.match(/^RUN:(.*)$/)[1]
-      cmd = get_command cmd_name
-      cmd_output = `#{cmd}`
-      send_msg(socket, cmd_output)
+      cmd_id = msg.match(/^RUN:(.*)$/)[1].to_i
+
+      unless child_threads[cmd_id]
+        child_threads[cmd_id] = Thread.new do
+          run_command_and_stream(socket, cmd_id)
+          child_threads[cmd_id] = nil
+        end
+      end
     when "STOP"
+
+      cmd_id = msg.match(/^STOP:(.*)$/)[1].to_i
+      unless child_threads[cmd_id].nil?
+        child_threads[cmd_id].kill
+        child_threads[cmd_id] = nil
+      end
 
     else
       log_error "Received an unrecognized message over the websocket: #{msg}"
@@ -47,13 +75,55 @@ def run_websocket(socket, initial_request)
 end
 
 
+# run_command_and_stream
+#
+# Run a command and stream the stdout and stderr through the websocket.
+def run_command_and_stream(socket, cmd_id)
+
+  cmd = get_command cmd_id
+  if cmd.nil?
+    log_error "Client requested command ID #{cmd_id} be run, but that ID does not exist."
+    return
+  end
+  Open3::popen3(cmd) do |stdin, stdout, stderr, cmd_thread|
+
+    continue = true
+
+    while ready_fds = IO.select([stdout, stderr])[0]
+      ready_fds.each{ |fd|
+        resp = fd.gets
+        if resp.nil?
+          continue = false
+          break
+        end
+        if fd == stdout
+          send_msg(socket, cmd_id, "OUT", resp, )
+        elsif fd == stderr
+          send_msg(socket, cmd_id, "ERR", resp, )
+        else
+          raise "Received output from popen3(#{cmd}) that was not via stdout or stderr."
+        end
+      }
+      break unless continue
+    end
+
+    cmd_thread.join
+    send_msg(socket, cmd_id, "FINISHED")
+  end
+end
+
+
+
 # get_command
 #
 #
-def get_command cmd_name
+def get_command cmd_id
   $config[:commands].each { |cmd|
-    return cmd[:cmd] if cmd[:name] == cmd_name
+    if cmd[:id] == cmd_id
+      return cmd[:cmd]
+    end
   }
+  nil
 end
 
 # accept_connection
@@ -79,7 +149,10 @@ def receive_msg socket
   # Check first two bytes
   byte1 = socket.getbyte
   byte2 = socket.getbyte
-  if byte1 == 0x88  # Browser is requesting that we close the connection.
+  if byte1 == 0x88  # Client is requesting that we close the connection.
+    # TODO: Unsure how to properly handle this case. Right now the socket will close and
+    # everything here will shut down - eventually? Kill all child threads first?
+    log_info "Client requested the websocket be closed."
     socket.close
     return
   end
@@ -107,21 +180,47 @@ end
 # send_msg
 #
 #
-def send_msg(socket, msg)
+def send_msg(socket, cmd_id, msg_type, msg=nil)
 
-  # Set a max frame size of MAX_WS_FRAME_SIZE bytes.
+
+  # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
   def send_frame(socket, fmsg)
-
     output = [0b10000001, fmsg.size, fmsg]
     socket.write output.pack("CCA#{fmsg.size}")
-
   end
 
-  if msg.size < MAX_WS_FRAME_SIZE
-    send_frame(socket, msg)
+  case msg_type
+  when "OUT", "ERR"
+    header = "#{cmd_id}:#{msg_type}:"
+    if header.length > MAX_WS_FRAME_SIZE
+      log_error "Message header '#{msg_type}' is too long. Msg: #{msg}."
+    elsif msg.nil?
+      log_error "Message of type '#{msg_type}' sent without a message."
+    else
+      if msg.length > MAX_WS_FRAME_SIZE - header.length
+        msg_part_len = MAX_WS_FRAME_SIZE - header.length
+        msg_parts = (0..(msg.length-1)/msg_part_len).map{ |i|
+          msg[i*msg_part_len,msg_part_len]
+        }
+        msg_parts.each{ |part|
+          send_frame(socket, header + part)
+        }
+      else
+        send_frame(socket, header + msg)
+      end
+    end
+
+  when "CLEAR", "FINISHED"
+    to_send = "#{cmd_id}:#{msg_type}"
+    if to_send.length > MAX_WS_FRAME_SIZE
+      log_error "Message of type '#{msg_type}' is too long. Msg: #{to_send}."
+    elsif !msg.nil?
+      log_error "Message of type '#{msg_type}' passed a message. Msg: #{msg}."
+    else
+      send_frame(socket, to_send)
+    end
   else
-    (0..(msg.size/MAX_WS_FRAME_SIZE).ceil - 1).each { |num|
-      send_frame(socket, msg[num*MAX_WS_FRAME_SIZE..(num+1)*MAX_WS_FRAME_SIZE - 1])
-    }
+    log_error "Trying to send a websocket message with unrecognized type: #{msg_type}"
   end
+
 end

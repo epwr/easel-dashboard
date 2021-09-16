@@ -54,6 +54,7 @@ def launch
   # Load the provided YAML
   overwrite_config $config[:yaml_file]
   log_info("YAML loaded successfully (from: #{$config[:yaml_file]})")
+  $config[:commands].each_with_index{ |cmd, i| cmd[:id] = i } # Give commands an ID.
   $config.freeze # Set config to read only
 
   # Lauch the server
