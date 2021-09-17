@@ -51,12 +51,14 @@ h2, .h2 {font-size: var(--text-size-large); font-weight: var(--text-weight-bold)
 h3, .h3 {font-size: var(--text-size-large); font-weight: var(--text-weight-semi-bold);}
 h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);}
 
+a { color: inherit; text-decoration: none; }
+
 *{padding: 0; margin: 0;}
 
 
 
 .screen {
-  height: 100vh;
+  height: calc(100vh - var(--size-xlarge));
   width: 100vw;
   display: flex;
   flex-direction: row;
@@ -67,9 +69,8 @@ h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);
 .cmd-picker {
   width: 320px;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
-.cmd-picker .command:not(:last-child) {border-bottom: solid 1px var(--accent);}
 
 .command-box{
   display: flex;
@@ -77,8 +78,9 @@ h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);
   background-color: var(--surface);
   border-radius: var(--size-small);
   align-items: stretch;
-  margin: var(--size-small);
+  margin: var(--size-large);
   overflow: hidden;
+  box-shadow: 0 var(--size-medium) var(--size-large) var(--shadow);
 }
 
 .command-info {
@@ -120,7 +122,7 @@ h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);
 ::-webkit-scrollbar {
   width: var(--size-small);
   height: var(--size-small);
-  background-color: var(--background);
+  background-color: none;
 }
 ::-webkit-scrollbar-thumb {
     background: var(--primary);
@@ -132,12 +134,28 @@ h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);
 
 
 
-
+.header {
+  width: 100vw;
+  height: var(--size-xlarge);
+  background-color: var(--surface);
+  z-index: 1;
+  box-shadow: 0 0 var(--size-medium) var(--shadow);
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+.header-logo {
+  margin-left: var(--size-large);
+  color: var(--primary);
+}
+.on-hover-secondary:hover {
+  color: var(--secondary);
+}
 
 
 
 .interface {
-  /* margin: var(--size-large); */
   flex-grow: 2;
   display: flex;
   flex-direction: column;
@@ -145,32 +163,31 @@ h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);
   align-items: stretch;
   overflow: hidden;
   border-radius: var(--size-small);
-  padding: var(--size-medium);
-  margin: var(--size-small);
+  margin: var(--size-large);
+  width: calc(100vw - calc(320px + calc(3 * var(--size-small))));
+  box-shadow: 0 var(--size-medium) var(--size-large) var(--shadow);
 }
 #interface-title {
-  padding-bottom: var(--size-medium);
+  margin: var(--size-medium);
 }
 .interface-output {
   flex-grow: 2;
   flex-basis: 0;
   padding: var(--size-medium);
-  box-shadow: inset 0 0 var(--size-medium) var(--background);
-}
-.interface-footer{
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  padding-top: var(--size-medium);
+  background-color: var(--background);
+  box-shadow: inset 0 0 var(--size-medium) var(--shadow);
+  width: calc(100% - calc(4 * var(--size-medium)));
+  margin: 0 var(--size-medium) 0;
 }
 .interface-commands {
-  width: 33%;
+  margin-top: var(--size-medium);
+  width: 100%;
   position: relative;
   display: flex;
   flex-direction: row;
   justify-content: stretch;
-  border-radius: var(--size-small);
   overflow: hidden;
+  border-top: solid 1px var(--primary);
 }
 .interface-button {
   flex-grow: 2;
@@ -190,7 +207,7 @@ h4, .h4 {font-size: var(--text-size); font-weight: var(--text-weight-semi-bold);
 .top-shadow {
   position: absolute;
   width: 100%;
-  transform: translate(calc( -1 * var(--size-small)),calc( -1 * calc( var(--size-large))));
+  transform: translate(0,calc( -1 * calc( var(--size-large))));
   height: var(--size-large);
   background-color: none;
   z-index: 50;

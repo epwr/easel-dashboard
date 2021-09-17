@@ -19,3 +19,16 @@ commands:
   - name: 'Looper'
     cmd:  './docs/examples/cmds/loop.rb'
     desc: 'Outputs to stdout and stderr.'
+
+colours:
+    surface:        '#333333'
+    background:     '#222222'
+    primary:        '#1597BB'
+    secondary:      '#150E56'
+    on_surface:     '#ffffff'
+    on_background:  '#ffffff'
+    on_primary:     '#ffffff'
+    on_secondary:   '#ffffff'
+    shadow:         '#000000'
+    stdout_colour:  '#ffffff'
+    stderr_colour:  '#1597BB'

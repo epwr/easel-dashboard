@@ -15,7 +15,7 @@
         let keep_pane_contents = false; // Remove default contents when you run a command.
 
         let streams = { <%$config[:commands].each do |command|%>
-          <%= command[:id] %>: { is_running: false,  content: "", name: "<%= command[:name] %>" },<% end %>
+          <%= command[:id] %>: { is_running: false,  content: "[Click 'Run' to run the command.]", name: "<%= command[:name] %>" },<% end %>
         };
 
         // Receive message
@@ -124,6 +124,12 @@
     </script>
   </head>
   <body>
+    <div class="header">
+      <div class="header-logo h2">
+        <%= $config[:header_logo] %>
+        <%= $config[:header_title] %>
+      </div>
+    </div>
     <div class="screen">
       <div class="cmd-picker">
 
@@ -162,17 +168,19 @@
 
 Click 'Help' (below) to see more.</pre>
         </div>
-        <div class="interface-footer">
-          <div class="interface-commands">
-            <div class="top-shadow"></div>
-            <div class="interface-button"
-              onclick="show_help_message()">
-              Help
-            </div>
-            <div class="interface-button"
-              onclick="console.log('Save output button has not been implemented.')">
-              Save Output
-            </div>
+        <div class="interface-commands">
+          <div class="top-shadow"></div>
+          <div class="interface-button"
+            onclick="show_help_message()">
+            Help
+          </div>
+          <div class="interface-button"
+            onclick="console.log('Save output button has not been implemented.')">
+            Save Output
+          </div>
+          <div class="interface-button"
+            onclick="console.log('Close server button has not been implemented.');">
+            Close Server
           </div>
         </div>
       </div>

@@ -15,6 +15,8 @@ $config = {
   hostname: 'localhost',  # Default hostname
   log_file: STDOUT,       # Default logging to STDOUT
   title: 'Easel - Your Custom Dashboard',
+  header_logo: '',
+  header_title: '<a class="on-hover-secondary" href="https://easeldashboard.com">Easel Dashboard</a>',
   colours: {
     surface:        '#222222',
     background:     '#000000',
