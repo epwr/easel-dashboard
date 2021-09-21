@@ -11,13 +11,13 @@
 # Global Variables
 $config = {
   logging: 2,             # 0=Fatal, 1=Error, 2=Warning, 3=Info
-  port: 4200,             # Default port
-  hostname: 'localhost',  # Default hostname
-  log_file: STDOUT,       # Default logging to STDOUT
-  title: 'Easel - Your Custom Dashboard',
-  header_logo: '',
-  header_title: '<a class="on-hover-secondary" href="https://easeldashboard.com">Easel Dashboard</a>',
-  colours: {
+  port: 4200,             # Port # to bind Easel to
+  hostname: 'localhost',  # Hostname to accept. "" Accepts all connections.
+  log_file: STDOUT,       # Where to write the logs to.
+  title: 'Easel - Your Custom Dashboard', # The title of the dashboard webpage.
+  header_logo: '',       # TODO: have nil mean default to Easel's, otherwise put in src=""
+  header_title: '<a class="on-hover-secondary" href="https://easeldashboard.com">Easel Dashboard</a>', # TODO: the same as the logo line basically.
+  colours: {                    # The RGB values for the dashboard. TODO: accept hsl in HTML format.
     surface:        '#222222',
     background:     '#000000',
     primary:        '#7DF9FF',
@@ -30,7 +30,7 @@ $config = {
     stdout_colour:  '#ffffff',
     stderr_colour:  '#00FF00'
   },
-  commands: [
+  commands: [  # A list of commands to allow the user to run via Easel.
       {
         name: 'Test 1',
         cmd:  'echo "this is the output of Test 1"',
@@ -41,5 +41,10 @@ $config = {
         cmd:  'echo "this is the output of Test 2"',
         desc: 'Simple output test #2'
       }
-  ]
+  ],
+  collect_data_period: 0,  # 0 = collection is turned off, else value in secs.
+  collect_data_area: {  # TODO: Set any to false to remove from dashboard.
+    uptime: true,
+    load_tracking: true
+  }
 }

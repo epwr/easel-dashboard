@@ -55,7 +55,6 @@ def handle_request socket
     # TODO: Deal with HEAD request. https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4
   else
     # TODO: respond with an appropriate error.
-    response "I don't understand what you sent - go away."
     socket.print "HTTP/1.1 200 OK\r\n" +
                  "Content-Type: text/plain\r\n" +
                  "Content-Length: #{response.bytesize}\r\n" +
@@ -101,7 +100,6 @@ def read_HTTP_message socket
       break
     end
   end
-
 
   request = {fields: {}}
   (request[:method], request[:url], request[:protocol]) = message[0].split(" ")
