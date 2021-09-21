@@ -32,3 +32,5 @@ colours:
     shadow:         '#000000'
     stdout_colour:  '#ffffff'
     stderr_colour:  '#1597BB'
+
+collect_data_period: 3

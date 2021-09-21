@@ -16,6 +16,8 @@ require 'digest'  # Allows hashing of websocket authentication value
 require 'open3'   # Allows capturing stdout and stderr of system commands
 require 'thread'  # Allows use of mutexes.
 
+require_relative 'data_gathering'
+
 # Key Variables
 MAX_WS_FRAME_SIZE = 50.0  # Must be a float number to allow a non-truncated division result.
 
@@ -27,6 +29,17 @@ def run_websocket(socket, initial_request)
   accept_connection(socket, initial_request[:fields][:Sec_WebSocket_Key][0..-3])
   child_threads = {}
   send_msg_mutex = Mutex.new # One mutex per websocket to control sending messages.
+
+  Thread.new {  # Periodically update the generic dashboard if set.
+    loop do
+      puts "---- Getting data! Period: #{$config[:collect_data_period]}"
+      data = read_data
+      puts "---- Data Read."
+      send_msg(socket, send_msg_mutex, nil, "GENDASH", data)
+      puts "---- Message sent."
+      sleep $config[:collect_data_period]
+    end
+  } unless $config[:collect_data_period] == 0
 
   loop {
     msg = receive_msg socket
@@ -166,12 +179,13 @@ end
 #
 def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
 
-
   # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
+  # TODO: Should this be a private method? I think yes.
   def send_frame(socket, fmsg)
     output = [0b10000001, fmsg.size, fmsg]
     socket.write output.pack("CCA#{fmsg.size}")
   end
+
 
   case msg_type
   when "OUT", "ERR"
@@ -196,15 +210,18 @@ def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
       }
     end
 
-  when "CLEAR", "FINISHED"
-    to_send = "#{cmd_id}:#{msg_type}"
-    if to_send.length > MAX_WS_FRAME_SIZE
-      log_error "Message of type '#{msg_type}' is too long. Msg: #{to_send}."
-    elsif !msg.nil?
+  when "CLEAR", "FINISHED", "GENDASH"
+    if !msg.nil?
       log_error "Message of type '#{msg_type}' passed a message. Msg: #{msg}."
-    else
-      send_frame(socket, to_send)
     end
+    to_send = "#{cmd_id}:#{msg_type}"
+    send_msg_mutex.synchronize {
+      if to_send.length > MAX_WS_FRAME_SIZE
+        log_error "Message of type '#{msg_type}' is too long. Msg: #{to_send}."
+      else
+        send_frame(socket, to_send)
+      end
+    }
   else
     log_error "Trying to send a websocket message with unrecognized type: #{msg_type}"
   end

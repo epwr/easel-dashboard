@@ -9,4 +9,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/epwr/cdash'
   s.executables << 'easel'
   s.license     = 'MIT'
+
+  s.add_runtime_dependency = "concurrent-ruby" ["=1.1.9"]
 end
