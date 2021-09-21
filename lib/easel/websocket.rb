@@ -12,11 +12,12 @@
 
 
 # Imports
-require 'digest'
-require 'open3'
+require 'digest'  # Allows hashing of websocket authentication value
+require 'open3'   # Allows capturing stdout and stderr of system commands
+require 'thread'  # Allows use of mutexes.
 
 # Key Variables
-MAX_WS_FRAME_SIZE = 50.0
+MAX_WS_FRAME_SIZE = 50.0  # Must be a float number to allow a non-truncated division result.
 
 # run_websocket
 #
@@ -25,6 +26,7 @@ def run_websocket(socket, initial_request)
 
   accept_connection(socket, initial_request[:fields][:Sec_WebSocket_Key][0..-3])
   child_threads = {}
+  send_msg_mutex = Mutex.new # One mutex per websocket to control sending messages.
 
   loop {
     msg = receive_msg socket
@@ -36,10 +38,11 @@ def run_websocket(socket, initial_request)
 
       unless child_threads[cmd_id]
         child_threads[cmd_id] = Thread.new do
-          run_command_and_stream(socket, cmd_id)
+          run_command_and_stream(socket, cmd_id, send_msg_mutex)
           child_threads[cmd_id] = nil
         end
       end
+
     when "STOP"
 
       cmd_id = msg.match(/^STOP:(.*)$/)[1].to_i
@@ -59,7 +62,7 @@ end
 # run_command_and_stream
 #
 # Run a command and stream the stdout and stderr through the websocket.
-def run_command_and_stream(socket, cmd_id)
+def run_command_and_stream(socket, cmd_id, send_msg_mutex)
 
   cmd = get_command cmd_id
   if cmd.nil?
@@ -78,9 +81,9 @@ def run_command_and_stream(socket, cmd_id)
           break
         end
         if fd == stdout
-          send_msg(socket, cmd_id, "OUT", resp, )
+          send_msg(socket, send_msg_mutex, cmd_id, "OUT", resp)
         elsif fd == stderr
-          send_msg(socket, cmd_id, "ERR", resp, )
+          send_msg(socket, send_msg_mutex, cmd_id, "ERR", resp)
         else
           raise "Received output from popen3(#{cmd}) that was not via stdout or stderr."
         end
@@ -89,7 +92,7 @@ def run_command_and_stream(socket, cmd_id)
     end
 
     cmd_thread.join
-    send_msg(socket, cmd_id, "FINISHED")
+    send_msg(socket, send_msg_mutex, cmd_id, "FINISHED")
   end
 end
 
@@ -161,7 +164,7 @@ end
 # send_msg
 #
 #
-def send_msg(socket, cmd_id, msg_type, msg=nil)
+def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
 
 
   # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
@@ -178,17 +181,19 @@ def send_msg(socket, cmd_id, msg_type, msg=nil)
     elsif msg.nil?
       log_error "Message of type '#{msg_type}' sent without a message."
     else
-      if msg.length > MAX_WS_FRAME_SIZE - header.length
-        msg_part_len = MAX_WS_FRAME_SIZE - header.length
-        msg_parts = (0..(msg.length-1)/msg_part_len).map{ |i|
-          msg[i*msg_part_len,msg_part_len]
-        }
-        msg_parts.each{ |part|
-          send_frame(socket, header + part)
-        }
-      else
-        send_frame(socket, header + msg)
-      end
+      send_msg_mutex.synchronize {
+        if msg.length > MAX_WS_FRAME_SIZE - header.length
+          msg_part_len = MAX_WS_FRAME_SIZE - header.length
+          msg_parts = (0..(msg.length-1)/msg_part_len).map{ |i|
+            msg[i*msg_part_len,msg_part_len]
+          }
+          msg_parts.each{ |part|
+            send_frame(socket, header + part)
+          }
+        else
+          send_frame(socket, header + msg)
+        end
+      }
     end
 
   when "CLEAR", "FINISHED"

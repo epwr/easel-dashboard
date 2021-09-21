@@ -69,22 +69,26 @@ features that I want to release, and a sequence for which features come next.
         some maximums (and minimums) of those.
       - Add client-side parsing of some websocket information. Allow for common
         commands (eg. top) to be parsed into attractive graphics.
-  - *v0.6: Documentation for Users*
+  - *v0.6: A 4, no 6, no 12 billion dollar pipeline!*
+      - Implement a proper CI/CD pipeline.
+      - Implement building binaries as part of the push to main (look at Ruby
+        Packer). Have these be released as pre-releases.
+  - *v0.7: Documentation for Users*
       - Add documentation on how to install Easel, and how to use it. This includes
         examples of YAML files, and explanations of the different YAML fields that are
         accepted.
-  - *v0.7: YAML Validation (because silent errors suck)*
+  - *v0.8: YAML Validation (because silent errors suck)*
       - Add YAML validation (check that all fields are valid, error on invalid fields).
       - Ensure YAML Errors include line number from the YAML file.
-  - *v0.8: Encryption Prescription*
+  - *v0.9: Encryption Prescription*
       - Add in encryption to all communication.
-  - *v0.9: Authentication Computation*
+  - *v0.10: Authentication Computation*
       - Add the ability to sign-in to the dashboard.
-  - *v0.10: UI Rework*
+  - *v0.11: UI Rework*
       - Create a UI that can be used on Mobile.
       - Make the UI look half decent.
       - Create a logo for Easel (have it be the default logo on the dashboard)
-  - *v0.11: Download logs*
+  - *v0.12: Download logs*
       - A button to download the output of a given command.
   - *v1.0: Hello World!*
       - Easel goes out into the world! The expectation is that all the
@@ -94,7 +98,7 @@ features that I want to release, and a sequence for which features come next.
         gracefully handling edge cases).
       - The refactor will involve the following (unless a refactor of these
         systems happens before v1.0):
-        - The websocket should not be the controller for server-run code. Core
+        - websocket.rb should not be the controller for server-run code. Core
           logic should be centralized and the websocket wrapper should be just
           that - a wrapper around the websocket.
         - Similarly, the HTTP functionality should be moved out of the server.
@@ -102,10 +106,6 @@ features that I want to release, and a sequence for which features come next.
           be handled elsewhere.
         - The Javascript should probably be broken out of the app.hmtl.erb file,
           into it's own file.
-      - Likely includes a rename to align with a domain name that I can actually get.
-      - Build a release pipeline
-      - Add documentation on the actual codebase to help future development.
-      - Implement a Major-Minor-Patch versioning system.
 
 ## Other Possible Features
 
@@ -114,6 +114,6 @@ product, include the following:
 
   - A 'production' system, where files are built once and then served repeatedly.
       - Not sure this is worth adding. The current system is better for development
-        and I don't think a production version would be a noticable improvement,
+        and I don't think a production version would be a noticeable improvement,
         except in the case of YAML files with 1000s of commands (but I think
         that's unlikely).
