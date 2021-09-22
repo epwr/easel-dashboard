@@ -7,8 +7,9 @@
 
 # Imports
 require 'socket'
-require_relative './build_pages.rb'
+require_relative './build_pages'
 require_relative './websocket'
+require_relative './data_gathering'
 
 
 def launch_server
@@ -19,6 +20,9 @@ def launch_server
   rescue Exception => e
     log_fatal "Server could not start. Error message: #{e}"
   end
+
+  # Lauch data collection if turned on.
+  launch_data_collection unless $config[:collect_data_period] == 0
 
   Thread.abort_on_exception = true
 

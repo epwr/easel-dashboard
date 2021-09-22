@@ -40,8 +40,9 @@ end
 def collect_data
   new_data = {}
 
-  if $config[:uptime] or $config[:load]
+  if $config[:collect_data_flags][:uptime] or $config[:collect_data_flags][:load]
     value = read_uptime_and_load
+    puts "----------- value: #{value}"
     unless value.nil?
       new_data[:uptime] = value[0] if $config[:config]
       if $config[:load]
@@ -80,16 +81,20 @@ end
 # problem by using semaphores and a mutex.
 def write_data data
 
-  loop do
+  puts "---- trying to write data"
+  joined = false
+  until joined
     @join_mutex.synchronize {
+      puts "---- write lock test: #{ @readers_semaphore.available_permits},  #{@writers_semaphore.available_permits}"
       if @readers_semaphore.available_permits == 0 and @writers_semaphore.available_permits == 0
         @writers_semaphore.release 1  # Increment @writers_semaphore
-        break
+        joined = true
       end
     }
     sleep 0.05  # Wait 50ms to give another thread time to lock the @join_mutex.
   end
 
+  puts "---- writing data"
   # Write Data
   data.each_key { |key|
     case key
@@ -101,7 +106,7 @@ def write_data data
   }
 
   # Log if the @collected_data has gotten too large.
-  if @collected_data[:load].length > 240
+  if not @collected_data[:load].nil? and @collected_data[:load].length > 240
     if @collected_data[:load].length > 1000
       log_error "Easel dashboard has run collect_data more than a 1000 times. Memory size likely to be large."
     else
@@ -119,32 +124,21 @@ end
 # problem by using semaphores and a mutex. Returns a copy
 def read_data
 
-  puts "---- in read_data"
   joined = false
   until joined
-    puts "---- starting loop"
     @join_mutex.synchronize {
-      puts "---- mutex locked"
       if @writers_semaphore.available_permits == 0
         @readers_semaphore.release 1  # Increment @readers_semaphore
-        puts "---- semaphore incremented"
         # TODO: likely need to release the mutex.
         joined = true
       end
     }
-    puts "---- mutex unlocked"
     sleep 0.05 unless joined  # Wait 50ms to give another thread time to lock the @join_mutex.
   end
 
-  puts "---- out of joining section."
-  STDOUT.flush
-  # TODO: stuck here and I don't get why.
   # Read Data
-  data = collect_data.dup
-
-  puts "---- acquire semaphore"
-  STDOUT.flush
+  data = @collected_data.dup
+  puts "----------------- data: #{data}"
   @readers_semaphore.acquire 1  # Decrement @readers_semaphore
-  puts "---- semaphore acquired"
   data
 end

@@ -212,7 +212,7 @@ def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
 
   when "CLEAR", "FINISHED", "GENDASH"
     if !msg.nil?
-      log_error "Message of type '#{msg_type}' passed a message. Msg: #{msg}."
+      log_error "Message of type '#{msg_type}' passed an empty message. Msg: #{msg}."
     end
     to_send = "#{cmd_id}:#{msg_type}"
     send_msg_mutex.synchronize {

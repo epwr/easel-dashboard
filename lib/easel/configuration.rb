@@ -43,8 +43,8 @@ $config = {
       }
   ],
   collect_data_period: 0,  # 0 = collection is turned off, else value in secs.
-  collect_data_area: {  # TODO: Set any to false to remove from dashboard.
+  collect_data_flags: {  # TODO: Set any to false to remove from dashboard.
     uptime: true,
-    load_tracking: true
+    load: true
   }
 }
