@@ -9,6 +9,55 @@
 #
 # Note: Websocket code is based on the code provided in the following article:
 # https://www.honeybadger.io/blog/building-a-simple-websockets-server-from-scratch-in-ruby/
+#
+# Overview of the websocket protocol:
+#     Communication over the websocket is split into two message types:
+#
+#       1. Command specific messages
+#             These messages are sent from either the client or the server, and
+#             are associated with a particular command via an ID. This ID is set
+#             by the server when building a page.
+#
+#             The server sends:
+#                 - ID:OUT:XXXXXXX where the contents of XXXX is new content in
+#                   the stdOUT of the command that's associated with ID.
+#                 - ID:ERR:XXXXXXX where the contents of XXXX is new content in
+#                   the stdERR of the command that's associated with ID.
+#                 - ID:FINISHED tells the client that the command associated with
+#                   ID has finished running.
+#                 - ID:CLEAR tells the client that the command associated with ID
+#                   wants to clear the current output. This is useful when
+#                   handling X-term escape sequences (eg. `top` wants a fresh page)
+#             The client sends:
+#                 - ID:RUN requests that the server start running the command
+#                   associated with ID.
+#                 - ID:STOP requests that the server stop running the command
+#                   associated with ID.
+#
+#       2. Dashboard Information
+#             These messages let the client indicate what information it wants to
+#             handle, and let the server send that content to the client either
+#             as a blob (if the information is historical) or as a stream (if
+#             the information is real time). When the client requests data, it
+#             includes a DID. The difference between the DID and an ID that
+#             is associated with a command is that the DID contains a letter
+#             at the start (eg. A12).
+#
+#             DIDs are structured as a letter that represents a dashboard, and
+#             a number that represents the element on the dashboard.
+#
+#             The server sends:
+#                 - DID:Y:XXXXXXXX sends data that should be connected to the
+#                   DID. The Y is either an A (representing "ALL") to say that the
+#                   message is a self-contained data point, or a ratio like (1/2)
+#                   to say its the first of two messages that when combined form
+#                   a data point.
+#
+#             At this point, the client does not send anything related to DIDs.
+#             Options in the future include letting the client request a range of
+#             data, but that will likely wait until the data on the server end
+#             is moved out of memory an on to disk.
+
 
 
 # Imports
@@ -32,11 +81,8 @@ def run_websocket(socket, initial_request)
 
   Thread.new {  # Periodically update the generic dashboard if set.
     loop do
-      puts "---- Getting data! Period: #{$config[:collect_data_period]}"
       data = read_data
-      puts "---- Data Read."
-      send_msg(socket, send_msg_mutex, nil, "GENDASH", data)
-      puts "---- Message sent."
+      send_msg(socket, send_msg_mutex, nil, "DASH", data)
       sleep $config[:collect_data_period]
     end
   } unless $config[:collect_data_period] == 0
@@ -179,16 +225,9 @@ end
 #
 def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
 
-  # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
-  # TODO: Should this be a private method? I think yes.
-  def send_frame(socket, fmsg)
-    output = [0b10000001, fmsg.size, fmsg]
-    socket.write output.pack("CCA#{fmsg.size}")
-  end
-
 
   case msg_type
-  when "OUT", "ERR"
+  when "OUT", "ERR" # See comments at the top of the file to explain this part of the protocol.
     header = "#{cmd_id}:#{msg_type}:"
     if header.length > MAX_WS_FRAME_SIZE
       log_error "Message header '#{msg_type}' is too long. Msg: #{msg}."
@@ -210,7 +249,37 @@ def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
       }
     end
 
-  when "CLEAR", "FINISHED", "GENDASH"
+  when "DASH"  # See comments at the top of the file to explain this part of the protocol.
+    if msg.nil?
+      log_error "Message of type '#{msg_type}' sent without a message."
+    end
+    msg.each_key { |dashboard|
+      msg[dashboard].each_key { |element|
+        did = "#{dashboard}#{element}"
+        send_msg_mutex.synchronize {
+          msg[dashboard][element].each_key { |key|
+            data_fragment = "#{key}->#{msg[dashboard][element][key]}"
+            if data_fragment.length > MAX_WS_FRAME_SIZE - (did.length + 3)
+              msg_part_len = MAX_WS_FRAME_SIZE - (did.length + 7) # TODO: Handle case where header is longer than DID:XX/XX:
+              msg_parts = (0..(data_fragment.length-1)/msg_part_len).map{ |i|
+                data_fragment[i*msg_part_len,msg_part_len]
+              }
+              msg_parts.each_with_index{ |part, index|
+                header = did + ":#{index + 1}/#{msg_parts.length}:"
+                if header.length > MAX_WS_FRAME_SIZE
+                  log_error "Message header '#{msg_type}' is too long. Data: #{data_fragment}."
+                end
+                send_frame(socket, header + part)
+              }
+            else
+              send_frame(socket, did + ":A:" + data_fragment)
+            end
+          }
+        }
+      }
+    }
+
+  when "CLEAR", "FINISHED"
     if !msg.nil?
       log_error "Message of type '#{msg_type}' passed an empty message. Msg: #{msg}."
     end
@@ -226,4 +295,16 @@ def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
     log_error "Trying to send a websocket message with unrecognized type: #{msg_type}"
   end
 
+end
+
+# send_frame
+#
+# Sends a message over the websocket. Requires that the message be an appropriate
+# length, and have the right format (eg. checks should be done before calling
+# this function).
+# TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
+def send_frame(socket, msg)
+  output = [0b10000001, msg.size, msg]
+  puts
+  socket.write output.pack("CCA#{msg.size}")
 end

@@ -84,6 +84,9 @@ def handle_get(socket, request)
   when "/app.css"
     socket.print build_css
     socket.close
+  when "/app.js"
+    socket.print build_js
+    socket.close
   else
     socket.print build_error 404
     socket.close

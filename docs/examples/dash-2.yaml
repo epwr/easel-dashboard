@@ -1,0 +1,39 @@
+title: 'Easel Dashabord'
+
+commands:
+  - name: 'Print Msg'
+    cmd:  'echo "This is the output of the command called \"Print Msg\""'
+    desc: 'echo a simple message'
+  - name: 'ls ~/'
+    cmd:  'ls ~/'
+    desc: 'Output of a simple command'
+  - name: 'Show Processes'
+    cmd:  'ps -aux'
+    desc: 'Output of ps -aux'
+  - name: 'Whoami'
+    cmd:  'whoami'
+    desc: 'Check the user running commands'
+  - name: 'Server pwd'
+    cmd:  'pwd'
+    desc: 'Shows the pwd'
+  - name: 'Looper'
+    cmd:  './docs/examples/cmds/loop.rb'
+    desc: 'Outputs to stdout and stderr.'
+
+dashboards:
+  - name: "Server Status"
+    elements:
+      - name: "CPU Load"
+        type: "time-series"
+        data:
+          - cmd:   "uptime"
+            name:  "1min Average"
+            regex: "average: (\\d+.\\d+)"
+          - cmd:   "uptime"
+            name:  "5min Average"
+            regex: ", (\\d+.\\d+),"
+          - cmd:   "uptime"
+            name:  "15min Average"
+            regex: ", (\\d+.\\d+)\\n"
+
+collect_data_period: 15

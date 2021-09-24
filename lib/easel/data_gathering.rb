@@ -7,8 +7,17 @@
 #     Uses semaphores and mutexes to provide atomic reads and writes. Allows a
 #     single writer at a time, but any number of readers can read at once.
 #
-#     WARNING: this feature currently holds all infomration in memory, so don't
+#     WARNING: this feature currently holds all information in memory, so don't
 #     turn this on if you're expecting to leave Easel running for a long time.
+#
+#     Plan for adressing this:
+#       - Move 'historical' data to a proper datastore (eg. a SQLite database)
+#       - Have only the most recent readings in @collected_data, to allow the
+#         websocket threads to pull the up to date data from there.
+#       - Eventually allow the clients to query the historial datastore, so it's
+#         likely that the best bet is to have the database store the data with
+#         the time as the dense index.
+
 
 # Imports
 require 'thread'
@@ -40,38 +49,25 @@ end
 def collect_data
   new_data = {}
 
-  if $config[:collect_data_flags][:uptime] or $config[:collect_data_flags][:load]
-    value = read_uptime_and_load
-    puts "----------- value: #{value}"
-    unless value.nil?
-      new_data[:uptime] = value[0] if $config[:config]
-      if $config[:load]
-        new_data[:load] = value[1..-1]
-      end
-    end
-  end
+  # TODO: Check which element type something is to figure out how to handle it.
 
+  log_info "Collecting data."
+  $config[:dashboards].each{ |dashboard|
+    new_data[dashboard[:id]] = {}
+    dashboard[:elements].each{ |element|
+      new_data[dashboard[:id]][element[:id]] = {}
+      element[:data].each_with_index{ |data, index|
+        output = `#{data[:cmd]}`
+        log_info "Ran `#{data[:cmd]}`, got: #{output}"
+        value = output.match(/#{data[:regex]}/)[1] # TODO: Deal with errors if match fails (log and send to client)
+        new_data[dashboard[:id]][element[:id]][index] = [
+          Time.new.strftime("%H:%M:%S"),
+          value
+        ]
+      }
+    }
+  }
   write_data new_data
-end
-
-
-# read_uptime_and_load
-#
-# Reads the current uptime and load information using the `uptime` command and
-# returns them as an array of [uptime, 1 min load, 5 min load, 15 min load]
-def read_uptime_and_load
-  output = `uptime`
-  begin
-    uptime = output.match(/up.*(\d+:\d+),/)[1]
-    loads = output.match(/load average.*(\d+.\d+), (\d+.\d+), (\d+.\d+)/)
-    load_1m = loads[1]
-    load_5m = loads[2]
-    load_15m = loads[3]
-    [uptime, load_1m, load_5m, load_15m]  # Return values as array to allow destructuring.
-  rescue NoMethodError => e
-    log_error "`uptime` returned value that failed to parse: '#{output}'"
-    nil
-  end
 end
 
 
@@ -81,11 +77,9 @@ end
 # problem by using semaphores and a mutex.
 def write_data data
 
-  puts "---- trying to write data"
   joined = false
   until joined
     @join_mutex.synchronize {
-      puts "---- write lock test: #{ @readers_semaphore.available_permits},  #{@writers_semaphore.available_permits}"
       if @readers_semaphore.available_permits == 0 and @writers_semaphore.available_permits == 0
         @writers_semaphore.release 1  # Increment @writers_semaphore
         joined = true
@@ -94,18 +88,18 @@ def write_data data
     sleep 0.05  # Wait 50ms to give another thread time to lock the @join_mutex.
   end
 
-  puts "---- writing data"
   # Write Data
   data.each_key { |key|
     case key
     when :load
+      @collected_data[:load] = [] if @collected_data[:load].nil?
       @collected_data[:load] << data[:load]
     else
       @collected_data[key] = data[key]
     end
   }
 
-  # Log if the @collected_data has gotten too large.
+  # Log if @collected_data has gotten too large.
   if not @collected_data[:load].nil? and @collected_data[:load].length > 240
     if @collected_data[:load].length > 1000
       log_error "Easel dashboard has run collect_data more than a 1000 times. Memory size likely to be large."
@@ -138,7 +132,7 @@ def read_data
 
   # Read Data
   data = @collected_data.dup
-  puts "----------------- data: #{data}"
+
   @readers_semaphore.acquire 1  # Decrement @readers_semaphore
   data
 end

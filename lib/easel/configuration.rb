@@ -42,9 +42,32 @@ $config = {
         desc: 'Simple output test #2'
       }
   ],
-  collect_data_period: 0,  # 0 = collection is turned off, else value in secs.
-  collect_data_flags: {  # TODO: Set any to false to remove from dashboard.
-    uptime: true,
-    load: true
-  }
+  collect_data_period: 15,
+  dashboards: [ # A list of dashboards to display
+    {
+      name: "Server Status",
+      id: "A", # TODO: dashboard and element IDs should be automatically added.
+      elements: [
+        name: "CPU Load",
+        id: "1",
+        type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
+        data: [
+          {
+            cmd:   "uptime",
+            name:  "1min Average",
+            regex: "average: (\\d+.\\d+)"
+          },
+          {
+            cmd:   "uptime",
+            name:  "5min Average",
+            regex: ", (\\d+.\\d+),"
+          },{
+            cmd:   "uptime",
+            name:  "15min Average",
+            regex: ", (\\d+.\\d+)\\n"
+          }
+        ]
+      ]
+    }
+  ]
 }

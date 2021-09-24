@@ -29,13 +29,15 @@ def build_app
   page
 end
 
+# build_js
+#
+#
+def build_js
+  js_erb = File.new("#{File.dirname(__FILE__)}/../html/app.js.erb").read
+  page = ERB.new(js_erb).result()
 
-def build_error code
-  error_erb = File.new("#{File.dirname(__FILE__)}/../html/error.html.erb").read
-  page = ERB.new(error_erb).result(binding)
-
-  "HTTP/1.1 #{code} #{@code_names[code]}\r\n" +
-  "Content-Type: text/html; charset=UTF-8\r\n" +
+  "HTTP/1.1 200 OK\r\n" +
+  "Content-Type: text/javascript; charset=UTF-8\r\n" +
   "Content-Length: #{page.bytesize}\r\n" +
   "Connection: close\r\n" +
   "\r\n" +
@@ -43,6 +45,9 @@ def build_error code
 end
 
 
+# build_css
+#
+#
 def build_css
   error_erb = File.new("#{File.dirname(__FILE__)}/../html/app.css.erb").read
   css = ERB.new(error_erb).result(binding)
@@ -53,4 +58,20 @@ def build_css
   "Connection: close\r\n" +
   "\r\n" +
   css
+end
+
+
+# build_error
+#
+#
+def build_error code
+  error_erb = File.new("#{File.dirname(__FILE__)}/../html/error.html.erb").read
+  page = ERB.new(error_erb).result(binding)
+
+  "HTTP/1.1 #{code} #{@code_names[code]}\r\n" +
+  "Content-Type: text/html; charset=UTF-8\r\n" +
+  "Content-Length: #{page.bytesize}\r\n" +
+  "Connection: close\r\n" +
+  "\r\n" +
+  page
 end
