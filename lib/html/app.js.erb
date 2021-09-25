@@ -11,15 +11,35 @@
 let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
 let current_cmd = null;
 let keep_pane_contents = false; // Remove default contents when you run a command.
-let commands = { <%$config[:commands].each do |command|%>
+let commands = { <% $config[:commands].each do |command| %>
   <%= command[:id] %>: {
     is_running: false,
     content: "[Click 'Run' to run the command.]",
      name: "<%= command[:name] %>" },
   <% end %>
 };
-let dashboards = { <%$config[:dashboards].each do |dashboard|%>
-
+let dashboards = { <% $config[:dashboards].each do |dashboard| %>
+  <%= dashboard[:id] %>: {
+    name: "<%= dashboard[:name] %>",
+    type: "<%= dashboard[:type] %>",
+    elements: [
+      <% dashboard[:elements].each do |element| %>
+        {
+          name: "<%= element[:name] %>",
+          type: "<%= element[:type] %>",
+          data: [
+            <% element[:data].each do |datum| %>
+              {
+                name: "<%= datum[:name] %>",
+                store: []
+              },
+            <% end %> <%# end data loop %>
+          ]
+        },
+      <% end %> <%# end element loop %>
+    ]
+  },
+  <% end %> <%# end dashboard loop %>
 };
 
 
@@ -46,7 +66,7 @@ ws_socket.onmessage = (event) => {
   msg = msg_frags.slice(2).join(":");
   // Validate
   if (!(id in commands) || !(["ERR", "OUT", "CLEAR", "FINISHED"].includes(cmd_type)) ) {
-    console.log("Error validating message: " + events.data);
+    console.log("Error validating message: " + event.data);
     return;
   }
 
@@ -119,13 +139,22 @@ function update_pane() {
   pane = document.getElementById('output-pane');
   pane_state = document.getElementById('interface-state');
   pane_state_details = document.getElementById('interface-state-details');
-  pane.innerHTML = commands[current_cmd]['content'];
-  if (commands[current_cmd]['is_running']) {
-    pane_state.innerHTML = "Running: ";
-  } else {
-    pane_state.innerHTML = "Output Of: ";
+
+
+  if (Number.isInteger(current_cmd)){
+    if (commands[current_cmd]['is_running']) {
+      pane_state.innerHTML = "Running: ";
+    } else {
+      pane_state.innerHTML = "Output Of: ";
+    }
+    pane_state_details.innerHTML = commands[current_cmd]['name'];
+    pane.innerHTML = commands[current_cmd]['content'];
+  } else { // is a dashboard
+    pane_state.innerHTML = dashboards[current_cmd]['name'];
+    pane_state_details.innerHTML = dashboards[current_cmd]['desc'];
+
+    pane.innerHTML = dashboards[current_cmd].toString()
   }
-  pane_state_details.innerHTML = commands[current_cmd]['name'];
 }
 
 /* show_help_message
@@ -146,4 +175,3 @@ function show_help_message() {
   pane_state.innerHTML = "Showing: ";
   pane_state_details = "Help Message";
 }
-script>

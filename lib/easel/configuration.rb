@@ -46,10 +46,10 @@ $config = {
   dashboards: [ # A list of dashboards to display
     {
       name: "Server Status",
+      desc: "Basic server status.",
       id: "A", # TODO: dashboard and element IDs should be automatically added.
       elements: [
         name: "CPU Load",
-        id: "1",
         type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
         data: [
           {

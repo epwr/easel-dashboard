@@ -6,7 +6,7 @@
       <%= $config[:title] %>
     </title>
     <link rel="stylesheet" href="/app.css">
-    <script src="/app.js" charset="utf-8"></script>
+    <script src="app.js" charset="utf-8"></script>
   </head>
   <body>
     <div class="header">
@@ -18,6 +18,27 @@
     <div class="screen">
       <div class="cmd-picker">
 
+        <%# Dashboards %>
+        <% $config[:dashboards].each do |dashboard| %>
+          <div class="command-box">
+            <div class="command-info"
+              onclick="load_pane(<%= dashboard[:id] %>)"
+              id="dash-<%=dashboard[:id]%>"
+              data-id="<%=dashboard[:id]%>">
+              <h2><%= dashboard[:name] %></h2>
+              <p><%= dashboard[:desc] %></p>
+            </div>
+            <div class="command-controls">
+              <div class="command-icon"
+                id="cmd-<%=dashboard[:id]%>-log-icon"
+                onclick="load_pane(<%= dashboard[:id] %>)">
+                Show
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Commands %>
         <% $config[:commands].each do |command| %>
           <div class="command-box">
             <div class="command-info"
@@ -42,6 +63,7 @@
             </div>
           </div>
         <% end %>
+
       </div>
       <div class="interface surface">
         <div id="interface-title">

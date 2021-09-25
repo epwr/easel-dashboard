@@ -53,14 +53,20 @@ def collect_data
 
   log_info "Collecting data."
   $config[:dashboards].each{ |dashboard|
+
     new_data[dashboard[:id]] = {}
-    dashboard[:elements].each{ |element|
-      new_data[dashboard[:id]][element[:id]] = {}
+    dashboard[:elements].each_with_index{ |element, e_index|
+      new_data[dashboard[:id]][e_index] = {}
+
       element[:data].each_with_index{ |data, index|
         output = `#{data[:cmd]}`
         log_info "Ran `#{data[:cmd]}`, got: #{output}"
-        value = output.match(/#{data[:regex]}/)[1] # TODO: Deal with errors if match fails (log and send to client)
-        new_data[dashboard[:id]][element[:id]][index] = [
+        begin
+          value = output.match(/#{data[:regex]}/)[1]
+        rescue NoMethodError => e
+          log_error "Data failed to be parsed. Regex: /#{data[:regex]}/ -- Output: #{output}"
+        end
+        new_data[dashboard[:id]][e_index][index] = [
           Time.new.strftime("%H:%M:%S"),
           value
         ]

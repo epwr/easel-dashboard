@@ -253,12 +253,12 @@ def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
     if msg.nil?
       log_error "Message of type '#{msg_type}' sent without a message."
     end
-    msg.each_key { |dashboard|
-      msg[dashboard].each_key { |element|
-        did = "#{dashboard}#{element}"
+    msg.each_key { |dash_id|
+      msg[dash_id].each_key { |ele_index|
+        did = "#{dash_id}#{ele_index}"
         send_msg_mutex.synchronize {
-          msg[dashboard][element].each_key { |key|
-            data_fragment = "#{key}->#{msg[dashboard][element][key]}"
+          msg[dash_id][ele_index].each_key { |key|
+            data_fragment = "#{key}->#{msg[dash_id][ele_index][key]}"
             if data_fragment.length > MAX_WS_FRAME_SIZE - (did.length + 3)
               msg_part_len = MAX_WS_FRAME_SIZE - (did.length + 7) # TODO: Handle case where header is longer than DID:XX/XX:
               msg_parts = (0..(data_fragment.length-1)/msg_part_len).map{ |i|
@@ -305,6 +305,5 @@ end
 # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
 def send_frame(socket, msg)
   output = [0b10000001, msg.size, msg]
-  puts
   socket.write output.pack("CCA#{msg.size}")
 end
