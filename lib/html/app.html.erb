@@ -6,6 +6,7 @@
       <%= $config[:title] %>
     </title>
     <link rel="stylesheet" href="/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
     <script src="app.js" charset="utf-8"></script>
   </head>
   <body>
@@ -22,7 +23,7 @@
         <% $config[:dashboards].each do |dashboard| %>
           <div class="command-box">
             <div class="command-info"
-              onclick="load_pane(<%= dashboard[:id] %>)"
+              onclick="load_pane('<%= dashboard[:id] %>')"
               id="dash-<%=dashboard[:id]%>"
               data-id="<%=dashboard[:id]%>">
               <h2><%= dashboard[:name] %></h2>
@@ -31,7 +32,7 @@
             <div class="command-controls">
               <div class="command-icon"
                 id="cmd-<%=dashboard[:id]%>-log-icon"
-                onclick="load_pane(<%= dashboard[:id] %>)">
+                onclick="load_pane('<%= dashboard[:id] %>')">
                 Show
               </div>
             </div>
@@ -71,6 +72,8 @@
           <span id="interface-state-details"></span>
         </div>
         <div class="interface-output scroll-content">
+          <div id="dash-elem">
+          </div>
           <pre class="output-pane" id="output-pane">Click 'Run' to run a command and see it's output.
 
 Click 'Help' (below) to see more.</pre>

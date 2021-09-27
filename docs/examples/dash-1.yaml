@@ -33,4 +33,4 @@ colours:
     stdout_colour:  '#ffffff'
     stderr_colour:  '#1597BB'
 
-collect_data_period: 3
+collect_data_period: 15
