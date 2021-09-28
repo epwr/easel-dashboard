@@ -119,3 +119,6 @@ product, include the following:
         and I don't think a production version would be a noticeable improvement,
         except in the case of YAML files with 1000s of commands (but I think
         that's unlikely).
+  - When an Error occurs, display an icon in the title bar. When clicked, it
+    displays the error and asks the user if they want to forward the error to me.
+      - Not sure if this is via email or a web API. Probably a web API.

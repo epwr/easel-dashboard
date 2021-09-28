@@ -1,4 +1,18 @@
-<!DOCTYPE html>
+<%#
+    Notes on the refactor for HTML/CSS stuff:
+      - Think about how I want to build the CSS/JS/HTML stuff. Do I want to send
+        as one file? Multiple different ones?
+      - Fix the ugliness that is the HTML for the main interface. Build it initially
+       as an empty <div> that has the write surface/interface classes, and is
+       positioned properly. Then use JS to load the first dashboard (or the first)
+       command.
+        - Why is there a span.h2 instead of just an h2? the line break. Fix with
+          flex?
+        - Why do commands and dashboards need different html? Can't it just be a
+          different onclick (and I guess remove the 'Run' button)?
+        - Need to show state a little better - how to highlight the current
+          dashboard or command?
+%><!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
@@ -66,7 +80,7 @@
         <% end %>
 
       </div>
-      <div class="interface surface">
+      <div class="interface surface" id="primary-display">
         <div id="interface-title">
           <span class="h2" id="interface-state">Waiting:</span>
           <span id="interface-state-details"></span>
@@ -95,5 +109,16 @@ Click 'Help' (below) to see more.</pre>
         </div>
       </div>
     </div>
+    <script type="text/javascript">
+      display = document.getElementById("primary-display");
+      console.log(display);
+      while (display.childNodes[0] != null) display.removeChild(display.childNodes[0]);
+      console.log(display);
+      new_display = create_dashboard("My Title is Great!", "This is not a good Description.", []);
+      console.log(new_display);
+      display.textContext = '';
+      display.appendChild(new_display);
+      console.log("I ran");
+    </script>
   </body>
 </html>

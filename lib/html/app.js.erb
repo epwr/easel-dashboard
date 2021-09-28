@@ -14,10 +14,12 @@
  *      - Controller: sets up state variables (eg. dashboards, comands,
  *        websocket), builds the websocket and initiates getting historical
  *        dashboard data.
+ *      - Component Builder: builds components like a new
  *      - Messaging: functions that are used to send and receive messages via
  *        the WebSocket.
  *      - Chart: functions that build and update the various Chart JS elements
- *        in dashboards.
+ *        in dashboards. Some ideological overlap with Component Builder, so need
+ *        a better taxonomy.
  *
  *    TODO: I want a 'plug and play' way to add in new element types. How this
  *    works needs to be designed. Basically, I need to drop in code on the client
@@ -28,6 +30,62 @@
  *    On the server side, I might be able to get away with without anythnig if I
  *    can design the YAML structure well enough to not need it.
  */
+
+// create_dashboard
+//
+// TODO: Move somewhere that makes more sense.
+function create_element(type) {
+  document.createElement("CANVAS");
+
+
+}
+// create_dashboard
+//
+// TODO: Move somewhere that makes more sense.
+function create_dashboard(dash_title, dash_desc, elements) {
+  dashboard = document.createElement("DIV");
+
+  // Build header and add to dashbaord.
+  header = document.createElement("DIV");
+  title = document.createElement("SPAN"); // TODO: remove this .H2 class. what was I doing?
+  desc = document.createElement("SPAN");
+  header.className = "interface-title";
+  title.className = "interface-state";
+  title.className = "interface-state-details"; // TODO: Fix the naming in
+  title.innerHTML = dash_title;
+  desc.innerHTML = dash_desc;
+  header.appendChild(title);
+  header.appendChild(desc);
+  dashboard.appendChild(header);
+
+  // Build the display (contains a canvas).
+  display = document.createElement("DIV");
+  canvas = document.createElement("CANVAS"); // TODO: This should be one per element
+  display.className = "interface-output scroll-content";
+  display.appendChild(canvas);
+  dashboard.appendChild(display);
+
+  // Build the footer.
+  footer = document.createElement("DIV");
+  shadow = document.createElement("DIV");
+  buttonOne = document.createElement("DIV");
+  buttonTwo = document.createElement("DIV");
+  buttonThree = document.createElement("DIV");
+  footer.className = "interface-commands";
+  shadow.className = "top-shadow";
+  buttonOne.className = "interface-button";
+  buttonTwo.className = "interface-button";
+  buttonThree.className = "interface-button";
+  buttonOne.onclick = () => {console.log("NotImplementedError")};
+  buttonTwo.onclick = () => {console.log("NotImplementedError")};
+  buttonThree.onclick = () => {console.log("NotImplementedError")};
+  dashboard.appendChild(footer);
+
+  footer.innerHTML = "This is the footer"; // TODO: what should be in the dashboard footer?
+
+  return dashboard;
+}
+
 
 // Key Variables
 let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
