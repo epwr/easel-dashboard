@@ -30,9 +30,9 @@ let dashboards = { <% $config[:dashboards].each do |dashboard| %>
           config: {
             type: 'line',
             data: {
-              labels: ["Een", "twee", "drie", "vier"],
+              labels: [],
               datasets: [
-                <% element[:data].each do |datum| %>
+                <% element[:data].each_with_index do |datum, index| %>
                 {
                   label:  "<%= datum[:name] %>",
                   data: [],
@@ -117,13 +117,49 @@ ws_socket.onmessage = (event) => {
       default:
         console.log("Error: Message not understood. Id: " + id + ", cmd_type: " + cmd_type + ", msg:" + msg);
     }
+
+
   } else { // .data start with a non-digit character (it's about a dashboard).
-    console.log("Not Implemented. Received:" + event.data);
 
+    // Split message into [DASH, ELEMENT, MSG FRAG, DATA TYPE]
+    msg_frags = event.data.split(":");
+    dash_id = msg_frags[0][0];
+    elem_id = parseInt(msg_frags[0].slice(1));
+    if (msg_frags[1] != "A" ) { console.log("Error: fragmented dashboard update received. Not implemented yet.")}
+    msg = msg_frags.slice(2).join(":");
 
+    // Parse daashboard update msg
+    data_type = parseInt(msg.split("->")[0]);
+    msg = msg.split("->")[1];
 
+    // Validate
+    if (!(dash_id in dashboards) ||
+        (dashboards[dash_id]['elements'][elem_id] == null) ||
+        (data_type in dashboards[dash_id]['elements'][elem_id]['config']['data']['datasets'][data_type] == null) ) {
+      console.log("Error validating dashboard update: " + event.data);
+      return;
+    }
 
+    // Update Chart
+    new_label = msg.split('"')[1];
+    new_val = parseFloat(msg.split('"')[3]);
+    append_time_series_data(dash_id, elem_id, data_type, new_label, new_val)
+    console.log("Valid dashboard update: " + event.data);
   }
+}
+
+
+function append_time_series_data(dash_id, elem_id, data_type, new_label, new_value) {
+
+  chart = dashboards[dash_id]['elements'][elem_id]['chart'];
+  const data = chart.data;
+  if (data_type == 0) { // Add a label from the 0th data type
+    data.labels.push(new_label);
+  }
+  data.datasets[data_type].data.push(new_value); // push another data point
+  chart.update();
+
+  console.log("Appending: " + new_value);
 }
 
 /* append_stream_content
