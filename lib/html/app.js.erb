@@ -7,6 +7,28 @@
  *    Dashboard.
  */
 
+/* Plan for a refactor:
+ *
+ *    This needs to be broken out into a few files (which could be merged into one
+ *    before sending to the client). Basically, I want:
+ *      - Controller: sets up state variables (eg. dashboards, comands,
+ *        websocket), builds the websocket and initiates getting historical
+ *        dashboard data.
+ *      - Messaging: functions that are used to send and receive messages via
+ *        the WebSocket.
+ *      - Chart: functions that build and update the various Chart JS elements
+ *        in dashboards.
+ *
+ *    TODO: I want a 'plug and play' way to add in new element types. How this
+ *    works needs to be designed. Basically, I need to drop in code on the client
+ *    side that goes from knowing the type (eg. 'time-series') to building the
+ *    canvas element, and handles updating it. I don't want to have to edit the
+ *    html.erb stuff to set up the canvas specifically.
+ *
+ *    On the server side, I might be able to get away with without anythnig if I
+ *    can design the YAML structure well enough to not need it.
+ */
+
 // Key Variables
 let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
 let current_cmd = null;

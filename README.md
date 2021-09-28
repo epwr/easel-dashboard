@@ -67,28 +67,30 @@ features that I want to release, and a sequence for which features come next.
       - Add in a default 'dashboard' page that shows common stats about the server
         such as CPU usage, network usage, memory usage, uptime, and maybe
         some maximums (and minimums) of those.
-      - Add client-side parsing of some websocket information. Allow for common
-        commands (eg. top) to be parsed into attractive graphics.
   - *v0.6: A 4, no 6, no 12 billion dollar pipeline!*
       - Implement a proper CI/CD pipeline.
       - Implement building binaries as part of the push to main (look at Ruby
         Packer). Have these be released as pre-releases.
-  - *v0.7: Documentation for Users*
+  - *v0.7: Refactor to speed up pushing features.*
+      - Refactor the client side JS (and likely the html.erb) to set up adding
+        new graph types easily. See notes in app.js.erb for some preliminary ideas.
+      - Refactor the server side code to have a clearer distribution of code.
+  - *v0.8: Documentation for Users*
       - Add documentation on how to install Easel, and how to use it. This includes
         examples of YAML files, and explanations of the different YAML fields that are
         accepted.
-  - *v0.8: YAML Validation (because silent errors suck)*
+  - *v0.9: YAML Validation (because silent errors suck)*
       - Add YAML validation (check that all fields are valid, error on invalid fields).
       - Ensure YAML Errors include line number from the YAML file.
-  - *v0.9: Encryption Prescription*
+  - *v0.10: Encryption Prescription*
       - Add in encryption to all communication.
-  - *v0.10: Authentication Computation*
+  - *v0.11: Authentication Computation*
       - Add the ability to sign-in to the dashboard.
-  - *v0.11: UI Rework*
+  - *v0.12: UI Rework*
       - Create a UI that can be used on Mobile.
       - Make the UI look half decent.
       - Create a logo for Easel (have it be the default logo on the dashboard)
-  - *v0.12: Download logs*
+  - *v0.13: Download logs*
       - A button to download the output of a given command.
   - *v1.0: Hello World!*
       - Easel goes out into the world! The expectation is that all the
