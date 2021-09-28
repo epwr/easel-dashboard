@@ -71,6 +71,9 @@ features that I want to release, and a sequence for which features come next.
       - Implement a proper CI/CD pipeline.
       - Implement building binaries as part of the push to main (look at Ruby
         Packer). Have these be released as pre-releases.
+      - Look into Circleci and Jenkins.
+      - Benchmark testing: web page size (minimize this), time to accepting
+        connections (launch time), HTTP message handling time. 
   - *v0.7: Refactor to speed up pushing features.*
       - Refactor the client side JS (and likely the html.erb) to set up adding
         new graph types easily. See notes in app.js.erb for some preliminary ideas.
