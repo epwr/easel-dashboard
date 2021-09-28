@@ -34,14 +34,6 @@
 // create_dashboard
 //
 // TODO: Move somewhere that makes more sense.
-function create_element(type) {
-  document.createElement("CANVAS");
-
-
-}
-// create_dashboard
-//
-// TODO: Move somewhere that makes more sense.
 function create_dashboard(dash_title, dash_desc, elements) {
   dashboard = document.createElement("DIV");
 
@@ -49,9 +41,7 @@ function create_dashboard(dash_title, dash_desc, elements) {
   header = document.createElement("DIV");
   title = document.createElement("SPAN"); // TODO: remove this .H2 class. what was I doing?
   desc = document.createElement("SPAN");
-  header.className = "interface-title";
-  title.className = "interface-state";
-  title.className = "interface-state-details"; // TODO: Fix the naming in
+  title.className = "h2";
   title.innerHTML = dash_title;
   desc.innerHTML = dash_desc;
   header.appendChild(title);
