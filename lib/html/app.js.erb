@@ -30,55 +30,15 @@
  *    On the server side, I might be able to get away with without anythnig if I
  *    can design the YAML structure well enough to not need it.
  */
+"use strict";
 
-// create_dashboard
-//
-// TODO: Move somewhere that makes more sense.
-function create_dashboard(dash_title, dash_desc, elements) {
-  dashboard = document.createElement("DIV");
-
-  // Build header and add to dashbaord.
-  header = document.createElement("DIV");
-  title = document.createElement("SPAN"); // TODO: remove this .H2 class. what was I doing?
-  desc = document.createElement("SPAN");
-  title.className = "h2";
-  title.innerHTML = dash_title;
-  desc.innerHTML = dash_desc;
-  header.appendChild(title);
-  header.appendChild(desc);
-  dashboard.appendChild(header);
-
-  // Build the display (contains a canvas).
-  display = document.createElement("DIV");
-  canvas = document.createElement("CANVAS"); // TODO: This should be one per element
-  display.className = "interface-output scroll-content";
-  display.appendChild(canvas);
-  dashboard.appendChild(display);
-
-  // Build the footer.
-  footer = document.createElement("DIV");
-  shadow = document.createElement("DIV");
-  buttonOne = document.createElement("DIV");
-  buttonTwo = document.createElement("DIV");
-  buttonThree = document.createElement("DIV");
-  footer.className = "interface-commands";
-  shadow.className = "top-shadow";
-  buttonOne.className = "interface-button";
-  buttonTwo.className = "interface-button";
-  buttonThree.className = "interface-button";
-  buttonOne.onclick = () => {console.log("NotImplementedError")};
-  buttonTwo.onclick = () => {console.log("NotImplementedError")};
-  buttonThree.onclick = () => {console.log("NotImplementedError")};
-  dashboard.appendChild(footer);
-
-  footer.innerHTML = "This is the footer"; // TODO: what should be in the dashboard footer?
-
-  return dashboard;
-}
 
 
 // Key Variables
 let ws_socket = new WebSocket("ws://" + location.hostname + ":" + location.port);
+let dashboard = {
+  dashboard:
+}
 let current_cmd = null;
 let keep_pane_contents = false; // Remove default contents when you run a command.
 let commands = { <% $config[:commands].each do |command| %>
@@ -138,90 +98,9 @@ Object.keys(dashboards).forEach( (dashboard_id) => {
 });
 
 
-/* Receive message
- *
- * Sets the WebSocket's onmessage handler to recieve the message and then process
- * it appropriately.
- */
-ws_socket.onmessage = (event) => {
-
-  pane = document.getElementById('output-pane');
-  console.log("Received: " + event.data);
-
-  // If msg is about a command, or a dashboard.
-  if (/\d/.test(event.data[0])) { // True IFF .data starts with a digit (command ID)
-    // Clear pane if appropriate
-    if (!keep_pane_contents) {
-      pane.innerHTML = "";
-      keep_pane_contents = true;
-    }
-
-    // Split message into [ID, CMD, MSG]
-    msg_frags = event.data.split(":");
-    id = msg_frags[0];
-    cmd_type = msg_frags[1];
-    msg = msg_frags.slice(2).join(":");
-    // Validate
-    if (!(id in commands) || !(["ERR", "OUT", "CLEAR", "FINISHED"].includes(cmd_type)) ) {
-      console.log("Error validating message: " + event.data);
-      return;
-    }
-
-    // Process message
-    switch (cmd_type) {
-      case "ERR":
-        append_stream_content(id, "<span class=\"stderr\">" + msg + "</span>");
-        break;
-      case "OUT":
-        append_stream_content(id, msg);
-        break;
-      case "CLEAR":
-        commands[id]['content'] = "";
-        update_pane();
-        break;
-      case "FINISHED":
-        document.getElementById('cmd-' + id + '-run-icon').innerHTML = "Run";
-        commands[id]['is_running'] = false;
-        update_pane();
-        break;
-      default:
-        console.log("Error: Message not understood. Id: " + id + ", cmd_type: " + cmd_type + ", msg:" + msg);
-    }
-
-
-  } else { // .data start with a non-digit character (it's about a dashboard).
-
-    // Split message into [DASH, ELEMENT, MSG FRAG, DATA TYPE]
-    msg_frags = event.data.split(":");
-    dash_id = msg_frags[0][0];
-    elem_id = parseInt(msg_frags[0].slice(1));
-    if (msg_frags[1] != "A" ) { console.log("Error: fragmented dashboard update received. Not implemented yet.")}
-    msg = msg_frags.slice(2).join(":");
-
-    // Parse daashboard update msg
-    data_type = parseInt(msg.split("->")[0]);
-    msg = msg.split("->")[1];
-
-    // Validate
-    if (!(dash_id in dashboards) ||
-        (dashboards[dash_id]['elements'][elem_id] == null) ||
-        (data_type in dashboards[dash_id]['elements'][elem_id]['config']['data']['datasets'][data_type] == null) ) {
-      console.log("Error validating dashboard update: " + event.data);
-      return;
-    }
-
-    // Update Chart
-    new_label = msg.split('"')[1];
-    new_val = parseFloat(msg.split('"')[3]);
-    append_time_series_data(dash_id, elem_id, data_type, new_label, new_val)
-    console.log("Valid dashboard update: " + event.data);
-  }
-}
-
-
 function append_time_series_data(dash_id, elem_id, data_type, new_label, new_value) {
 
-  chart = dashboards[dash_id]['elements'][elem_id]['chart'];
+  let chart = dashboards[dash_id]['elements'][elem_id]['chart'];
   const data = chart.data;
   if (data_type == 0) { // Add a label from the 0th data type
     data.labels.push(new_label);
@@ -239,7 +118,7 @@ function append_time_series_data(dash_id, elem_id, data_type, new_label, new_val
 function append_stream_content(id, content){
   console.log("Id: " + id + ", current_cmd: " + current_cmd + ", content: " + content);
   commands[id]['content'] += content;
-  update_pane();
+  update_dashboard();
 }
 
 /* toggle_run
@@ -258,16 +137,16 @@ function toggle_run(id){
     current_cmd = id;
   }
   commands[id]['is_running'] = !commands[id]['is_running'];
-  update_pane();
+  update_dashboard();
 }
 
 /* load_pane
  *
  * Loads the output/dashboard associated with the id.
  */
-function load_pane(id) {
-  current_cmd = id;
-  update_pane();
+function load_dashboard(id) {
+  current_cmd = id; // TODO: update the name of this to represent that it refers to a dashboard.
+  update_dashboard();
 }
 
 /* updates_pane
@@ -275,10 +154,11 @@ function load_pane(id) {
  * Updates the contents of the pane. Typically called after a message has been
  * received that wants to put new content onto the pane.
  */
-function update_pane() {
-  pane = document.getElementById('output-pane');
-  pane_state = document.getElementById('interface-state');
-  pane_state_details = document.getElementById('interface-state-details');
+function update_dashboard() {
+
+  let pane = document.getElementById('output-pane');
+  let pane_state = document.getElementById('interface-state');
+  let pane_state_details = document.getElementById('interface-state-details');
 
 
   if (Number.isInteger(current_cmd)){
@@ -305,9 +185,9 @@ function update_pane() {
  */
 function show_help_message() {
   current_cmd = null;
-  pane = document.getElementById('output-pane');
-  pane_state = document.getElementById('interface-state');
-  pane_state_details = document.getElementById('interface-state-details');
+  let pane = document.getElementById('output-pane');
+  let pane_state = document.getElementById('interface-state');
+  let pane_state_details = document.getElementById('interface-state-details');
   pane.innerHTML =
     "Welcome to the CDash Dashboard! Programs are set up via a YAML file on the server.\n\n" +
     "You can run these programs by clicking 'Run' under a program's information.\n\n" +

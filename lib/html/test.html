@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Whoot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+    <script src="dashboardElements.js" charset="utf-8"></script>
+    <script src="createComponents.js" charset="utf-8"></script>
+  </head>
+  <body>
+
+    <div id="me">
+
+    </div>
+    <script type="text/javascript">
+        let parent = document.getElementById('me');
+        let elements = [
+          {
+            type: 'time-series', name: 'Test 1', desc: 'This is a nice test',
+            dataTypes: [
+              { name: "data 0", colour: "#ff0000" },
+              { name: "data 1", colour: "#00ff00" },
+              { name: "data 2", colour: "#0000ff" },
+            ]
+          },
+          {
+            type: 'time-series', name: 'Test 2', desc: 'This is a better test',
+            dataTypes: [
+              { name: "D0", colour: "#ffff00" },
+              { name: "D1", colour: "#00ffff" },
+              { name: "D2", colour: "#ff00ff" },
+            ]
+          }
+        ];
+
+        appendDashboard("Dashboard #1", "A test dashboard", elements);
+    </script>
+
+  </body>
+</html>

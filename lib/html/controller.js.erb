@@ -1,0 +1,128 @@
+/* controller.js.erb
+ *
+ * Author: Eric Power
+ *
+ * Description:
+ *    This ERB file generates the javascript that runs the client side of the Easel
+ *    Dashboard.
+ */
+
+// Key Variables
+let webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port);
+let graphicDashboards = {
+  <% $config[:dashboards].each do |dashboard| %>
+    "<%= dashboard[:id] %>": new GraphicDashboard("<%= dashboard[:name] %>", "<%= dashboard[:desc] %>", [
+      <% dashboard[:elements].each do |element| %>
+        {
+          type: "<%= element[:type] %>",
+          name: "<%= element[:name] %>",
+          desc: "___________",
+          dataTypes: [
+            <% element[:data].each do |datum| %>
+            {
+              name: "<%= datum[:name] %>",
+              colour: "<%= $config[:colours][:primary] %>"
+            },
+            <% end %>
+          ]
+        },
+      <% end %>
+    ]),
+  <% end %>
+}
+let textDashboards = { <% $config[:commands].each do |command| %>
+  <%= command[:id] %>: {
+    isRunning: false,
+    content: "[Click 'Run' to run the command.]",
+    name: "<%= command[:name] %>" },
+  <% end %>
+};
+let dashboardState = {
+  wrapperNode = document.getElementById("dashboard-wrapper"),
+  dashboardId = "<%= $config[:dashboards][0][:id] %>",
+  dashboardObj = graphicDashboards["<%= $config[:dashboards][0][:id] %>"]
+}
+
+
+// Handle incomming websocket messages.
+/* Receive message
+ *
+ * Sets the WebSocket's onmessage handler to recieve the message and then process
+ * it appropriately.
+ */
+webSocket.onmessage = (event) => {
+
+  console.log("Received: " + event.data);
+
+  // If msg is about a command, or a dashboard.
+  if (/\d/.test(event.data[0])) { // True IFF .data starts with a digit (command ID)
+
+    // Clear pane if appropriate
+    if (!keep_pane_contents) {  pane.innerHTML = ""; keep_pane_contents = true; }
+
+    // Split message into [ID, CMD, MSG]
+    let msg_frags = event.data.split(":");
+    let id = msg_frags[0];
+    let cmd_type = msg_frags[1];
+    let msg = msg_frags.slice(2).join(":");
+    // Validate
+    if (!(id in commands) || !(["ERR", "OUT", "CLEAR", "FINISHED"].includes(cmd_type)) ) {
+      console.log("Error validating message: " + event.data);
+      return;
+    }
+
+    // TODO: RIGHT HERE! RIGHT HERE! RIGHT HERE! RIGHT HERE!
+
+    // Process message
+    switch (cmd_type) {
+      case "ERR":
+        append_stream_content(id, "<span class=\"stderr\">" + msg + "</span>");
+        break;
+      case "OUT":
+        append_stream_content(id, msg);
+        break;
+      case "CLEAR":
+        commands[id]['content'] = "";
+        update_dashboard();
+        break;
+      case "FINISHED":
+        document.getElementById('cmd-' + id + '-run-icon').innerHTML = "Run";
+        commands[id]['is_running'] = false;
+        update_dashboard();
+        break;
+      default:
+        console.log("Error: Message not understood. Id: " + id + ", cmd_type: " + cmd_type + ", msg:" + msg);
+    }
+
+
+  } else { // .data start with a non-digit character (it's about a dashboard).
+
+    // Split message into [DASH, ELEMENT, MSG FRAG, DATA TYPE]
+    let msg_frags = event.data.split(":");
+    let dash_id = msg_frags[0][0];
+    let elem_id = parseInt(msg_frags[0].slice(1));
+    if (msg_frags[1] != "A" ) {
+      console.log("Error: fragmented dashboard update received. Not implemented yet.")
+      return;
+    }
+    let msg = msg_frags.slice(2).join(":");
+
+    // Parse daashboard update msg
+    let data_type = parseInt(msg.split("->")[0]);
+    msg = msg.split("->")[1];
+
+    // Validate
+    if (!(dash_id in dashboards) ||
+        (dashboards[dash_id]['elements'][elem_id] == null) ||
+        (data_type in dashboards[dash_id]['elements'][elem_id]['config']['data']['datasets'][data_type] == null) ) {
+      console.log("Error validating dashboard update: " + event.data);
+      return;
+    }
+
+    // Update Chart
+    let new_label = msg.split('"')[1];
+    let new_val = parseFloat(msg.split('"')[3]);
+    append_time_series_data(dash_id, elem_id, data_type, new_label, new_val)
+    console.log("Valid dashboard update: " + event.data);
+  }
+}

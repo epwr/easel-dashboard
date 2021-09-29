@@ -45,6 +45,36 @@ def build_js
 end
 
 
+# return_js
+#
+#
+def return_js file
+
+  page = File.new("#{File.dirname(__FILE__)}/../html/#{file}").read
+
+  "HTTP/1.1 200 OK\r\n" +
+  "Content-Type: text/javascript; charset=UTF-8\r\n" +
+  "Content-Length: #{page.bytesize}\r\n" +
+  "Connection: close\r\n" +
+  "\r\n" +
+  page
+end
+
+# return_html
+#
+#
+def return_html file
+
+  page = File.new("#{File.dirname(__FILE__)}/../html/#{file}").read
+
+  "HTTP/1.1 200 OK\r\n" +
+  "Content-Type: text/html; charset=UTF-8\r\n" +
+  "Content-Length: #{page.bytesize}\r\n" +
+  "Connection: close\r\n" +
+  "\r\n" +
+  page
+end
+
 # build_css
 #
 #

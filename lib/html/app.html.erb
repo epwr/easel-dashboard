@@ -30,23 +30,23 @@
         <%= $config[:header_title] %>
       </div>
     </div>
-    <div class="screen">
-      <div class="cmd-picker">
+    <div class="interface">
+      <div class="dashboard-selector">
 
-        <%# Dashboards %>
+        <%# GraphicDashboards %>
         <% $config[:dashboards].each do |dashboard| %>
-          <div class="command-box">
-            <div class="command-info"
-              onclick="load_pane('<%= dashboard[:id] %>')"
+          <div class="selector-card">
+            <div class="card-info"
+              onclick="load_dashboard('<%= dashboard[:id] %>')"
               id="dash-<%=dashboard[:id]%>"
               data-id="<%=dashboard[:id]%>">
               <h2><%= dashboard[:name] %></h2>
               <p><%= dashboard[:desc] %></p>
             </div>
-            <div class="command-controls">
-              <div class="command-icon"
+            <div class="card-controls">
+              <div class="card-icon"
                 id="cmd-<%=dashboard[:id]%>-log-icon"
-                onclick="load_pane('<%= dashboard[:id] %>')">
+                onclick="load_dashboard('<%= dashboard[:id] %>')">
                 Show
               </div>
             </div>
@@ -55,24 +55,24 @@
 
         <%# Commands %>
         <% $config[:commands].each do |command| %>
-          <div class="command-box">
-            <div class="command-info"
-              onclick="load_pane(<%=command[:id]%>)"
+          <div class="selector-card">
+            <div class="card-info"
+              onclick="load_dashboard(<%=command[:id]%>)"
               id="cmd-<%=command[:id]%>"
               data-id="<%=command[:id]%>"
               data-cmd="<%=command[:cmd]%>">
               <h2><%= command[:name] %></h2>
               <p><%= command[:desc] %></p>
             </div>
-            <div class="command-controls">
-              <div class="command-icon"
+            <div class="card-controls">
+              <div class="card-icon"
                 id="cmd-<%=command[:id]%>-run-icon"
                 onclick="toggle_run(<%= command[:id] %>)">
                 Run
               </div>
-              <div class="command-icon"
+              <div class="card-icon"
                 id="cmd-<%=command[:id]%>-log-icon"
-                onclick="load_pane(<%=command[:id]%>)">
+                onclick="load_dashboard(<%=command[:id]%>)">
                 Show
               </div>
             </div>
@@ -80,45 +80,10 @@
         <% end %>
 
       </div>
-      <div class="interface surface" id="primary-display">
-        <div id="interface-title">
-          <span class="h2" id="interface-state">Waiting:</span>
-          <span id="interface-state-details"></span>
-        </div>
-        <div class="interface-output scroll-content">
-          <div id="dash-elem">
-          </div>
-          <pre class="output-pane" id="output-pane">Click 'Run' to run a command and see it's output.
 
-Click 'Help' (below) to see more.</pre>
-        </div>
-        <div class="interface-commands">
-          <div class="top-shadow"></div>
-          <div class="interface-button"
-            onclick="show_help_message()">
-            Help
-          </div>
-          <div class="interface-button"
-            onclick="console.log('Save output button has not been implemented.')">
-            Save Output
-          </div>
-          <div class="interface-button"
-            onclick="console.log('Close server button has not been implemented.');">
-            Close Server
-          </div>
-        </div>
+      <div class="surface" id="dashboard-wrapper">
+        LOADING...
       </div>
     </div>
-    <script type="text/javascript">
-      dddisp = document.getElementById("primary-display");
-      console.log(dddisp);
-      while (dddisp.childNodes[0] != null) dddisp.removeChild(dddisp.childNodes[0]);
-      console.log(dddisp);
-      new_display = create_dashboard("My Title is Great!", "This is not a good Description.", []);
-      console.log(new_display);
-      dddisp.textContext = '';
-      dddisp.appendChild(new_display);
-      console.log("I ran");
-    </script>
   </body>
 </html>

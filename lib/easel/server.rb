@@ -81,11 +81,20 @@ def handle_get(socket, request)
   when "/", "/index.html"
     socket.print build_app
     socket.close
+  when "/test.html" # TODO: Remove this!
+    socket.print return_html "test.html"
+    socket.close
   when "/app.css"
     socket.print build_css
     socket.close
   when "/app.js"
     socket.print build_js
+    socket.close
+  when "/dashboardElements.js"
+    socket.print return_js 'dashboardElements.js'
+    socket.close
+  when "/createComponents.js"
+    socket.print return_js 'createComponents.js'
     socket.close
   else
     socket.print build_error 404
