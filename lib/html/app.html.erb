@@ -91,6 +91,6 @@
     </div>
   </body>
   <script type="text/javascript">
-
+    load_dashboard("<%=$config[:dashboards].nil? ? 0 : $config[:dashboards][0][:id]%>")
   </script>
 </html>
