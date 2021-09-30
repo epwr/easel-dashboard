@@ -49,24 +49,42 @@ $config = {
       desc: "Basic server status.",
       id: "A", # TODO: dashboard and element IDs should be automatically added.
       elements: [
-        name: "CPU Load",
-        type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
-        data: [
-          {
-            cmd:   "uptime",
-            name:  "1min Average",
-            regex: "average: (\\d+.\\d+)"
-          },
-          {
-            cmd:   "uptime",
-            name:  "5min Average",
-            regex: ", (\\d+.\\d+),"
-          },{
-            cmd:   "uptime",
-            name:  "15min Average",
-            regex: ", (\\d+.\\d+)\\n"
-          }
-        ]
+        {
+          name: "CPU Load",
+          type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
+          data: [
+            {
+              cmd:   "uptime",
+              name:  "1min Average",
+              regex: "average: (\\d+.\\d+)"
+            },
+            {
+              cmd:   "uptime",
+              name:  "5min Average",
+              regex: ", (\\d+.\\d+),"
+            },{
+              cmd:   "uptime",
+              name:  "15min Average",
+              regex: ", (\\d+.\\d+)\\n"
+            }
+          ]
+        },
+        {
+          name: "Memory",
+          type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
+          data: [
+            {
+              cmd:   "free",
+              name:  "Total Memory",
+              regex: "Mem:\\W+(\\d+)"
+            },
+            {
+              cmd:   "free",
+              name:  "Free Memory",
+              regex: "Mem:\\W+\\d+\\W+(\\d+)"
+            }
+          ]
+        }
       ]
     }
   ]

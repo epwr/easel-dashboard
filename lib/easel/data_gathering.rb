@@ -56,12 +56,18 @@ def collect_data
 
     new_data[dashboard[:id]] = {}
     dashboard[:elements].each_with_index{ |element, e_index|
+      print "element: "
+      p element
       new_data[dashboard[:id]][e_index] = {}
 
       element[:data].each_with_index{ |data, index|
         output = `#{data[:cmd]}`
         log_info "Ran `#{data[:cmd]}`, got: #{output}"
         begin
+          puts '--------------------------------------'
+          p data[:regex]
+          p output
+          puts '--------------------------------------'
           value = output.match(/#{data[:regex]}/)[1]
         rescue NoMethodError => e
           log_error "Data failed to be parsed. Regex: /#{data[:regex]}/ -- Output: #{output}"
