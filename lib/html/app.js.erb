@@ -98,28 +98,7 @@ Object.keys(dashboards).forEach( (dashboard_id) => {
 });
 
 
-function append_time_series_data(dash_id, elem_id, data_type, new_label, new_value) {
 
-  let chart = dashboards[dash_id]['elements'][elem_id]['chart'];
-  const data = chart.data;
-  if (data_type == 0) { // Add a label from the 0th data type
-    data.labels.push(new_label);
-  }
-  data.datasets[data_type].data.push(new_value); // push another data point
-  chart.update();
-
-  console.log("Appending: " + new_value);
-}
-
-/* append_stream_content
- *
- * Adds the contents of a message (content) to the output for a given id.
- */
-function append_stream_content(id, content){
-  console.log("Id: " + id + ", current_cmd: " + current_cmd + ", content: " + content);
-  commands[id]['content'] += content;
-  update_dashboard();
-}
 
 /* toggle_run
  *

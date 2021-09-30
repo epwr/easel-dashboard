@@ -33,7 +33,7 @@ end
 #
 #
 def build_js
-  js_erb = File.new("#{File.dirname(__FILE__)}/../html/app.js.erb").read
+  js_erb = File.new("#{File.dirname(__FILE__)}/../html/controller.js.erb").read
   page = ERB.new(js_erb).result()
 
   "HTTP/1.1 200 OK\r\n" +

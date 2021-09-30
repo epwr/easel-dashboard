@@ -87,7 +87,8 @@ def handle_get(socket, request)
   when "/app.css"
     socket.print build_css
     socket.close
-  when "/app.js"
+  when "/controller.js"
+    log_info "building controller"
     socket.print build_js
     socket.close
   when "/dashboardElements.js"

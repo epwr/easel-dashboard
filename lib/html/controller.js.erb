@@ -31,17 +31,11 @@ let graphicDashboards = {
   <% end %>
 }
 let textDashboards = { <% $config[:commands].each do |command| %>
-  <%= command[:id] %>: {
-    isRunning: false,
-    content: "[Click 'Run' to run the command.]",
-    name: "<%= command[:name] %>" },
+  "<%= command[:id] %>": new TextDashboard("Waiting:",
+                                           "",
+                                           "[Please run a command to see the output here.]"),
   <% end %>
 };
-let dashboardState = {
-  wrapperNode = document.getElementById("dashboard-wrapper"),
-  dashboardId = "<%= $config[:dashboards][0][:id] %>",
-  dashboardObj = graphicDashboards["<%= $config[:dashboards][0][:id] %>"]
-}
 
 
 // Handle incomming websocket messages.
@@ -54,11 +48,8 @@ webSocket.onmessage = (event) => {
 
   console.log("Received: " + event.data);
 
-  // If msg is about a command, or a dashboard.
-  if (/\d/.test(event.data[0])) { // True IFF .data starts with a digit (command ID)
-
-    // Clear pane if appropriate
-    if (!keep_pane_contents) {  pane.innerHTML = ""; keep_pane_contents = true; }
+  // If msg is about a textDashboard, or a graphicDashboard.
+  if (/\d/.test(event.data[0])) { // True IFF .data starts with a digit (textDashboard ID)
 
     // Split message into [ID, CMD, MSG]
     let msg_frags = event.data.split(":");
@@ -66,40 +57,34 @@ webSocket.onmessage = (event) => {
     let cmd_type = msg_frags[1];
     let msg = msg_frags.slice(2).join(":");
     // Validate
-    if (!(id in commands) || !(["ERR", "OUT", "CLEAR", "FINISHED"].includes(cmd_type)) ) {
+    if (!(id in textDashboards) ) {
       console.log("Error validating message: " + event.data);
       return;
     }
-
-    // TODO: RIGHT HERE! RIGHT HERE! RIGHT HERE! RIGHT HERE!
-
     // Process message
+    let tDash = textDashboards[id];
     switch (cmd_type) {
       case "ERR":
-        append_stream_content(id, "<span class=\"stderr\">" + msg + "</span>");
+        tDash.appendContent( "<span class=\"stderr\">" + msg + "</span>");
         break;
       case "OUT":
-        append_stream_content(id, msg);
+        tDash.appendContent(msg);
         break;
       case "CLEAR":
-        commands[id]['content'] = "";
-        update_dashboard();
+        tDash.clearContent();
         break;
       case "FINISHED":
-        document.getElementById('cmd-' + id + '-run-icon').innerHTML = "Run";
-        commands[id]['is_running'] = false;
-        update_dashboard();
+        tDash.setIsRunning(false);
         break;
       default:
         console.log("Error: Message not understood. Id: " + id + ", cmd_type: " + cmd_type + ", msg:" + msg);
     }
 
-
   } else { // .data start with a non-digit character (it's about a dashboard).
 
     // Split message into [DASH, ELEMENT, MSG FRAG, DATA TYPE]
     let msg_frags = event.data.split(":");
-    let dash_id = msg_frags[0][0];
+    let dash_id = msg_frags[0][0]; // TODO: Allow more than one character to represent the dashboard.
     let elem_id = parseInt(msg_frags[0].slice(1));
     if (msg_frags[1] != "A" ) {
       console.log("Error: fragmented dashboard update received. Not implemented yet.")
@@ -107,22 +92,45 @@ webSocket.onmessage = (event) => {
     }
     let msg = msg_frags.slice(2).join(":");
 
-    // Parse daashboard update msg
-    let data_type = parseInt(msg.split("->")[0]);
+    // Parse dashboard update msg
+    let dataType = parseInt(msg.split("->")[0]);
     msg = msg.split("->")[1];
-
-    // Validate
-    if (!(dash_id in dashboards) ||
-        (dashboards[dash_id]['elements'][elem_id] == null) ||
-        (data_type in dashboards[dash_id]['elements'][elem_id]['config']['data']['datasets'][data_type] == null) ) {
-      console.log("Error validating dashboard update: " + event.data);
-      return;
-    }
+    let label = msg.split('"')[1];
+    let value = parseFloat(msg.split('"')[3]);
 
     // Update Chart
-    let new_label = msg.split('"')[1];
-    let new_val = parseFloat(msg.split('"')[3]);
-    append_time_series_data(dash_id, elem_id, data_type, new_label, new_val)
-    console.log("Valid dashboard update: " + event.data);
+    let gDash = graphicDashboards[dash_id];
+    gDash.addData(elem_id, dataType, label, value);
+    console.log("Appending: " + value);
   }
+}
+
+/* toggle_run
+ *
+ * Sends a message to the server to stop or run the given id (dependent on its
+ * state), and updates the run/stop button accordingly.
+ */
+function toggle_run(id){
+
+  let tDash = textDashboards[id];
+  if (tDash == null) {
+    console.log("Error: toggle_run called with id '" + id + "'");
+    return;
+  }
+  if (tDash.isRunning) { // TODO: Move into the Dashboard Class.
+    webSocket.send("STOP:" + id);
+  } else {
+    webSocket.send("RUN:" + id);
+  }
+  tDash.toggleRunning();
+}
+
+/* load_dashboard
+ *
+ * Loads the dashboard associated with the id.
+ */
+function load_dashboard(id) {
+  let dash = graphicDashboards[id];
+  if(dash == null) dash = textDashboards[id];
+  dash.load();
 }
