@@ -78,7 +78,8 @@ features that I want to release, and a sequence for which features come next.
   - *v0.7: Refactor to speed up pushing features.*
       - Refactor the client side JS (and likely the html.erb) to set up adding
         new graph types easily. See notes in app.js.erb for some preliminary ideas.
-      - Refactor the server side code to have a clearer distribution of code.
+      - Refactor the server side code to have a clearer distribution of code, and
+        to allow for more complex data types in a graphical dashboard.
   - *v0.8: Documentation for Users*
       - Add documentation on how to install Easel, and how to use it. This includes
         examples of YAML files, and explanations of the different YAML fields that are

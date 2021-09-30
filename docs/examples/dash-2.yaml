@@ -35,5 +35,17 @@ dashboards:
           - cmd:   "uptime"
             name:  "15min Average"
             regex: ", (\\d+.\\d+)\\n"
+      - name: "CPU Load"
+        type: "time-series"
+        data:
+          - cmd:   "uptime"
+            name:  "1min Average"
+            regex: "average: (\\d+.\\d+)"
+          - cmd:   "uptime"
+            name:  "5min Average"
+            regex: ", (\\d+.\\d+),"
+          - cmd:   "uptime"
+            name:  "15min Average"
+            regex: ", (\\d+.\\d+)\\n"
 
 collect_data_period: 15
