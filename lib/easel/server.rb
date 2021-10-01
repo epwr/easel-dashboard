@@ -33,10 +33,10 @@ def launch_server
         handle_request client
     end
   }
-
-  # Handle shutting down.
-  rescue Interrupt
+  rescue Interrupt # Handle shutting down.
     log_info "Interrupt received, server shutting down..."
+  rescue Exception => e
+    log_error "Unexpected error occured and closed client connection. Error: #{e}"
   end
 end
 

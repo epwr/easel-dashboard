@@ -305,5 +305,9 @@ end
 # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
 def send_frame(socket, msg)
   output = [0b10000001, msg.size, msg]
-  socket.write output.pack("CCA#{msg.size}")
+  begin
+    socket.write output.pack("CCA#{msg.size}")
+  rescue IOError
+    log_error "WebSocket is closed. Msg: #{msg}"
+  end
 end
