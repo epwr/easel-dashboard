@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'easel-dashboard'
   s.version     = '0.5'
-  s.executables << 'bin/easel'
+  s.executables << 'easel'
   s.licenses    = ['MIT']
   s.summary     = 'An easier way to manage your server.'
   s.authors     = ['Eric Power']

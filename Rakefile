@@ -7,25 +7,25 @@ task :run do
   sh "./lib/easel.rb ./docs/examples/dash-1.yaml"
 end
 
+task :clean
+
 namespace "gem" do
 
   desc 'Validates that the version number is appropriately set (v=X.X)'
   task :validate_version do
-    if ENV['v'].nil? or not ENV['v'].match(/v?(\d+\.\d+)/)
+    if ENV['v'].nil? or not ENV['v'].match(/^\d+\.\d+$/)
       raise "Error: `rake create_gemspec` requires a version number."
     end
   end
 
+  desc ""
   task :gemspec => %w[validate_version] do
     # Expect ARGV to be the version number
-    version = ENV['v'].match(/v?(\d+\.\d+)/)[1]
 
-    # Generate task for the version number (otherwise rake is unhappy)
-    task ARGV[1].to_sym do ; end
     gemspec = File.new("easel.gemspec", "w")
     gemspec.puts "Gem::Specification.new do |s|"
     gemspec.puts "  s.name        = 'easel-dashboard'"
-    gemspec.puts "  s.version     = '#{version}'"
+    gemspec.puts "  s.version     = '#{ENV['v']}'"
     gemspec.puts "  s.executables << 'easel'"
     gemspec.puts "  s.licenses    = ['MIT']"
     gemspec.puts "  s.summary     = 'An easier way to manage your server.'"
@@ -39,12 +39,16 @@ namespace "gem" do
     gemspec.close
   end
 
-
   task :build => %w[validate_version] do
     sh "gem build easel.gemspec"
   end
 
   task :push => %w[validate_version] do
-    puts "pushings... "
+    sh "gem push easel-dashboard-#{ENV['v']}.gem"
+  end
+
+  task :clean do
+    # TODO: for .gem file, rm.
+    sh "rm *.gem"
   end
 end
