@@ -18,7 +18,7 @@ namespace "gem" do
     end
   end
 
-  desc ""
+  desc "Builds the .gemspec file."
   task :gemspec => %w[validate_version] do
     # Expect ARGV to be the version number
 
@@ -39,16 +39,20 @@ namespace "gem" do
     gemspec.close
   end
 
+  desc "builds a gem based on the gemspec."
   task :build => %w[validate_version] do
     sh "gem build easel.gemspec"
   end
 
+  desc "pushes a gem to rubygems.org"
   task :push => %w[validate_version] do
     sh "gem push easel-dashboard-#{ENV['v']}.gem"
   end
 
+  desc "Cleans up the .gem files."
   task :clean do
-    # TODO: for .gem file, rm.
-    sh "rm *.gem"
+    Dir['*.gem'].each { |file|
+      sh "rm " + file
+    }
   end
 end
