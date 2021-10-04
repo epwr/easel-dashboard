@@ -12,6 +12,14 @@ task :test do
   sh "rspec spec/*"
 end
 
+desc "Kill any running server instances"
+task :kill do
+  pids = `lsof -i | grep localhost | sed 's|^ruby\\s*\\([[:digit:]]*\\).*$|\\1|'`
+  pids =  pids.split("\n").map { |pid| pid.to_i }.uniq.each { |pid|
+    Process.kill "INT", pid
+  }
+end
+
 
 task :clean
 
