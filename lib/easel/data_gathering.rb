@@ -85,6 +85,7 @@ def write_data data
 
   joined = false
   until joined
+    p @join_mutex
     @join_mutex.synchronize {
       if @readers_semaphore.available_permits == 0 and @writers_semaphore.available_permits == 0
         @writers_semaphore.release 1  # Increment @writers_semaphore
