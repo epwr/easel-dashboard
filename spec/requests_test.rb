@@ -28,6 +28,7 @@ describe "Request Tests" do
       it "should accept TCP connections" do
         s = TCPSocket.open("localhost", PORT)
         expect(s.closed?).to eq(false)
+        s.close
       end
 
       it "should be able to handle multiple TCP connections" do
@@ -37,11 +38,13 @@ describe "Request Tests" do
             s = TCPSocket.open("localhost", PORT)
             sleep 1
             expect(s.closed?).to eq(false)
+            s.close
           end
         end
         threads.each { |thr| thr.join }
       end
     end
+
 
     context "The HTTP Server" do
 
@@ -58,6 +61,7 @@ describe "Request Tests" do
           line = s.gets
         end
         expect(lines[0]).to eq("HTTP/1.1 200 OK\r\n")
+        s.close
       end
 
       it "should be able to appropriately handle a HEAD request" do
@@ -73,6 +77,7 @@ describe "Request Tests" do
           line = s.gets
         end
         expect(lines[0]).to eq("HTTP/1.1 200 OK\r\n")
+        s.close
       end
 
       it "should be able to handle requests with difficult fields." do
@@ -88,7 +93,69 @@ describe "Request Tests" do
           line = s.gets
         end
         expect(lines[0]).to eq("HTTP/1.1 200 OK\r\n")
+        s.close
       end
+    end
+
+
+    context "The WebSocket Server" do
+
+      it "should accept websocket upgrades properly" do
+        s = TCPSocket.open("localhost", PORT)
+        s.write "GET /createComponents.js HTTP/1.1\r\n" +
+                "Upgrade: websocket\r\n" +
+                "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
+                "\r\n\r\n"
+        line = ""
+        loop do
+          line = s.gets
+          raise "No Sec-WebSocket-Accept field returned" if line.nil?
+          break if line.include? "Sec-WebSocket-Accept: "
+        end
+        expect(line.split(": ")[1]).to eq("HSmrc0sMlYUkAGmm5OPpG2HaGWk=\r\n")
+
+        line = s.gets
+        while line != "\r\n"
+          line = s.gets
+        end
+
+        s.close
+      end
+
+      it "should be able to respond to 0:RUN within 500ms" do
+        s = TCPSocket.open("localhost", PORT)
+        s.write "GET /createComponents.js HTTP/1.1\r\n" +
+                "Upgrade: websocket\r\n" +
+                "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
+                "\r\n\r\n"
+        loop do
+          line = s.gets
+          raise "No Sec-WebSocket-Accept field returned" if line.nil?
+          break if line.include? "Sec-WebSocket-Accept: "
+        end
+        expect(line.split(": ")[1]).to eq("HSmrc0sMlYUkAGmm5OPpG2HaGWk=\r\n")
+
+        line = s.gets
+        while line != "\r\n"
+          line = s.gets
+        end
+
+        Timeout::timeout(0.5) do
+          s.puts "0:RUN"
+          loop {
+            line =  s.gets
+            p line
+            break if line.nil?
+          }
+
+        end
+
+      end
+
+      it "should stream the first DID command with 500ms of accepting the upgrade." do
+        fail
+      end
+
     end
 
    after(:context) do
