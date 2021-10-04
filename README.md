@@ -63,7 +63,7 @@ features that I want to release, and a sequence for which features come next.
   - *v0.4: Easy Install -- RELEASED*
       - Let Easel be installed via one command. Possibly as a ruby gem, possibly
         with some other package manager, possibly with an install script.
-  - *v0.5: A Real Dashboard*
+  - *v0.5: A Real Dashboard -- RELEASED*
       - Add in a default 'dashboard' page that shows common stats about the server
         such as CPU usage, network usage, memory usage, uptime, and maybe
         some maximums (and minimums) of those.
