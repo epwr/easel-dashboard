@@ -46,6 +46,13 @@ def handle_request socket
   log_info "Receieved request: #{socket}"
   request = read_HTTP_message socket
 
+  if request.nil?
+    puts "SOCKET IS FUCKKING CLOSES"
+    socket.print build_error 400
+    socket.close
+    return
+  end
+
   # TODO: check what the minimum allow handling is. I think there's one more method I need to handle.
   case request[:method]
   when "GET"
@@ -59,12 +66,7 @@ def handle_request socket
     # TODO: Deal with HEAD request. https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4
   else
     # TODO: respond with an appropriate error.
-    socket.print "HTTP/1.1 200 OK\r\n" +
-                 "Content-Type: text/plain\r\n" +
-                 "Content-Length: #{response.bytesize}\r\n" +
-                 "Connection: close\r\n" +
-                 "\r\n" +
-                 response
+    socket.print build_error 400
     socket.close
   end
 
@@ -110,8 +112,14 @@ end
 # Read an HTTP message from the socket, and parse it into a request Hash.
 def read_HTTP_message socket
   message = []
+  first_line = true
   loop do
     line = socket.gets
+    if first_line
+      puts "line: #{line}"
+      return nil if line.nil? or line.match(/^(GET|HEAD|POST|PUT|DELETE|OPTIONS|TRACE) .+ HTTP.+/)
+      first_line = false
+    end
     message << line
     if line == "\r\n"
       break

@@ -8,6 +8,7 @@ require 'erb'
 # Key Variables
 @code_names = {
   200 => "OK",
+  400 => "Bad Request",
   404 => "Not Found",
   405 => "Forbidden",
   418 => "I'm a teapot",
