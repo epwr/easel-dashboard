@@ -14,10 +14,12 @@ end
 
 desc "Kill any running server instances"
 task :kill do
-  pids = `lsof -i | grep localhost | sed 's|^ruby\\s*\\([[:digit:]]*\\).*$|\\1|'`
-  pids =  pids.split("\n").map { |pid| pid.to_i }.uniq.each { |pid|
+  pid_strs = `lsof -i | grep localhost | sed 's|^ruby\\s*\\([[:digit:]]*\\).*$|\\1|'`
+  pids = pid_strs.split("\n").uniq.map { |pid| pid.to_i }
+  pids.each { |pid|
     Process.kill "INT", pid
   }
+  puts "Killed #{pids.length} processes."
 end
 
 
