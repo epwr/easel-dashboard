@@ -61,17 +61,33 @@ def handle_request socket
     else
         handle_get(socket, request)
     end
-  #when "HEAD"
+  when "HEAD"
     # TODO: Deal with HEAD request. https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4
+    if request[:fields][:Upgrade] == "websocket\r\n"
+    else
+      read_end, write_end = IO.pipe
+      handle_get(write_end, request)
+      msg = ""
+      loop do
+        msg += read_end.readline
+        if msg.include? "\r\n\r\n"
+          socket.print msg
+          socket.close
+          break
+        elsif read_end.readline.nil?
+          socket.print build_error 500
+          socket.close
+          break
+        end
+      end
+    end
   else
-    # TODO: respond with an appropriate error.
+    puts "THIS SHOULD NOT OCCUREEEEEE"
     socket.print build_error 400
     socket.close
   end
 
 end
-
-
 
 # handle_get
 #
@@ -115,8 +131,7 @@ def read_HTTP_message socket
   loop do
     line = socket.gets
     if first_line
-      puts "line: #{line}"
-      return nil if line.nil? or line.match(/^(GET|HEAD|POST|PUT|DELETE|OPTIONS|TRACE) .+ HTTP.+/)
+      return nil if line.nil? or not line.match(/^(GET|HEAD|POST|PUT|DELETE|OPTIONS|TRACE) .+ HTTP.+/)
       first_line = false
     end
     message << line
