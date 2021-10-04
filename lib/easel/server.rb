@@ -52,17 +52,14 @@ def handle_request socket
     return
   end
 
-  # TODO: check what the minimum allow handling is. I think there's one more method I need to handle.
   case request[:method]
   when "GET"
-    # TODO: respond with app, css file, favicon, or 404 error.
     if request[:fields][:Upgrade] == "websocket\r\n"
       run_websocket(socket, request)
     else
         handle_get(socket, request)
     end
   when "HEAD"
-    # TODO: Deal with HEAD request. https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4
     if request[:fields][:Upgrade] == "websocket\r\n"
     else
       read_end, write_end = IO.pipe
@@ -114,6 +111,7 @@ def handle_get(socket, request)
   when "/createComponents.js"
     socket.print return_js 'createComponents.js'
     socket.close
+  # TODO: respond with favicon
   else
     socket.print build_error 404
     socket.close
