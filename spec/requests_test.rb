@@ -27,8 +27,6 @@ describe RequestTests do
 
    context "The TCP Server" do
 
-
-
       it "should accept TCP connections" do
 
       end
@@ -36,6 +34,17 @@ describe RequestTests do
       it "should close TCP connections after a non-HTTP formated string is sent." do
          msg "this is not HTTP - idk what this is."
          # TODO:
+      end
+
+      it "should be able to handle multiple TCP connections" do
+
+        10.times do
+          fork do
+            # TODO: connect to server
+            sleep 1
+            # TODO: ensure that connection is still open. Maybe send a GET.
+          end
+        end
       end
 
    end
