@@ -65,12 +65,8 @@ def parse_ARGV
       end
     end
 
-    opts.on("-h HOST", "--hostname HOST",  "Sets the hostname. Default is '#{$config[:hostname]}'.") do |port|
-      if port >= 0 and port <= 65535
-        $config[:port] = port
-      else
-        log_fatal "Command argument PORT '#{port}' not a valid port. Must be between 0 and 65535 (inclusive)"
-      end
+    opts.on("-h HOST", "--hostname HOST",  "Sets the hostname. Default is '#{$config[:hostname]}'.") do |host|
+      $config[:host] = host
     end
 
     opts.on("-o [FILE]", "--output [FILE]",  "Set a log file.") do |filename|
