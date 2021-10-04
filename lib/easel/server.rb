@@ -47,7 +47,6 @@ def handle_request socket
   request = read_HTTP_message socket
 
   if request.nil?
-    puts "SOCKET IS FUCKKING CLOSES"
     socket.print build_error 400
     socket.close
     return

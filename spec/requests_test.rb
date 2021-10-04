@@ -18,7 +18,6 @@ describe "Request Tests" do
       # Create a new server on localhost:4200 (for every context)
       @server_pid = fork do
         output = `#{__dir__}/../lib/easel.rb #{PATH_TO_YAML}`
-        puts "SERVER LOGS:\n#{output}"
       end
       sleep 1 # Allow the server to set up.
     end
@@ -42,8 +41,6 @@ describe "Request Tests" do
         threads.each { |thr| thr.join }
       end
    end
-
-   
 
    after(:context) do
      # Kill the server after every context.
