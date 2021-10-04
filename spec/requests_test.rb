@@ -7,6 +7,7 @@
 
 # Imports
 require 'socket'
+require 'timeout'
 
 # Key Variables
 PATH_TO_YAML = "#{__dir__}/../docs/examples/dash-1.yaml"
@@ -16,7 +17,8 @@ describe "Request Tests" do
     before(:context) do
       # Create a new server on localhost:4200 (for every context)
       @server_pid = fork do
-        `#{__dir__}/../lib/easel.rb #{__dir__}/../docs/example/dash-1.yaml`
+        output = `#{__dir__}/../lib/easel.rb #{PATH_TO_YAML}`
+        puts "SERVER LOGS:\n#{output}"
       end
       sleep 1 # Allow the server to set up.
     end
@@ -26,13 +28,6 @@ describe "Request Tests" do
       it "should accept TCP connections" do
         s = TCPSocket.open("localhost", 4200)
         expect(s.closed?).to eq(false)
-      end
-
-      it "should close TCP connections after a non-HTTP formated string is sent." do
-         msg = "this is not HTTP - idk what this is."
-         s = TCPSocket.open("localhost", 4200)
-         s.write msg
-         expect(s.closed?).to eq(true)
       end
 
       it "should be able to handle multiple TCP connections" do
@@ -47,6 +42,8 @@ describe "Request Tests" do
         threads.each { |thr| thr.join }
       end
    end
+
+   
 
    after(:context) do
      # Kill the server after every context.
