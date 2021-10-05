@@ -69,6 +69,8 @@ require_relative 'data_gathering'
 
 # Key Variables
 MAX_WS_FRAME_SIZE = 50.0  # Must be a float number to allow a non-truncated division result.
+# TODO: change to 127.0
+
 
 # run_websocket
 #
@@ -81,14 +83,19 @@ def run_websocket(socket, initial_request)
 
   Thread.new {  # Periodically update the generic dashboard if set.
     loop do
+      log_error "DATA BRANCH: Right here and now"
       data = read_data
+      log_error "DATA BRANCH: Just a little bit later"
       send_msg(socket, send_msg_mutex, nil, "DASH", data)
+      log_error "DATA BRANCH: Just a bit more little bit later"
       sleep $config[:collect_data_period]
     end
   } unless $config[:collect_data_period] == 0
 
   loop {
+    log_error "MAIN BRANCH: One"
     msg = receive_msg socket
+    log_error "MAIN BRANCH: Two"
     break if msg.nil? # The socket was closed by the client.
 
     case msg.split(":")[0]
@@ -191,7 +198,7 @@ def receive_msg socket
 
   # Check first two bytes
   byte1 = socket.getbyte
-  byte2 = socket.getbyte
+  byte2 = socket.getbyte  # TODO: THESE ARE ALREADY NIL??????????
   if byte1 == 0x88  # Client is requesting that we close the connection.
     # TODO: Unsure how to properly handle this case. Right now the socket will close and
     # everything here will shut down - eventually? Kill all child threads first?
@@ -204,7 +211,18 @@ def receive_msg socket
   msg_size = byte2 & 0b01111111
   is_masked = byte2 & 0b10000000
   unless fin and opcode == 1 and is_masked and msg_size < MAX_WS_FRAME_SIZE
-    log_error "Invalid websocket message received. #{byte1}-#{byte2}"
+    print "byte1: "
+    p byte1
+    print "byte2: "
+    p byte2
+    puts "byte1: #{byte1.to_s(2)}"
+    puts "byte2: #{byte2.to_s(2)}"
+    puts "-- fin: #{fin}"
+    puts "opcode: #{opcode}"
+    puts "is_masked: #{is_masked}"
+    puts "msg_size: #{msg_size} (< #{MAX_WS_FRAME_SIZE})"
+
+    log_error "Invalid websocket message received. #{byte1.to_s(2)}-#{byte2.to_s(2)}"
     puts socket.gets
     msg_size.times.map { socket.getbyte }  # Read message from socket.
     return

@@ -102,10 +102,10 @@ describe "Request Tests" do
 
       it "should accept websocket upgrades properly" do
         s = TCPSocket.open("localhost", PORT)
-        s.write "GET /createComponents.js HTTP/1.1\r\n" +
+        s.write "GET / HTTP/1.1\r\n" +
                 "Upgrade: websocket\r\n" +
                 "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
-                "\r\n\r\n"
+                "\r\n"
         line = ""
         loop do
           line = s.gets
@@ -123,17 +123,31 @@ describe "Request Tests" do
       end
 
       it "should be able to respond to 0:RUN within 500ms" do
+
+        fp = File.new("/home/epwr/projects/easel/out.txt", "w")
         s = TCPSocket.open("localhost", PORT)
-        s.write "GET /createComponents.js HTTP/1.1\r\n" +
+        s.write "GET / HTTP/1.1\r\n" +
                 "Upgrade: websocket\r\n" +
                 "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
-                "\r\n\r\n"
+                "\r\n"
+        fp.puts "here11111"
         loop do
-          line = s.gets
+          begin
+            line = s.gets
+          rescue Exception => e
+            fp.puts "Error: #{e}"
+            sleep 2
+            line = "garbage"
+          end
+          puts "LINE: '#{line}'"
           raise "No Sec-WebSocket-Accept field returned" if line.nil?
           break if line.include? "Sec-WebSocket-Accept: "
         end
+        fp.puts "here2"
         expect(line.split(": ")[1]).to eq("HSmrc0sMlYUkAGmm5OPpG2HaGWk=\r\n")
+
+
+        fp.puts "hello"
 
         line = s.gets
         while line != "\r\n"
@@ -141,13 +155,19 @@ describe "Request Tests" do
         end
 
         Timeout::timeout(0.5) do
-          s.puts "0:RUN"
+          msg = "0:RUN"
+
+          fp.puts "0b10000000"
+          fp.puts "#{msg.size.to_s(2)}"
+          fp.puts "#{(0b10000000 | msg.size).to_s(2)}"
+          output = [0b10000001, (0b10000000 | msg.size), msg]
+          fp.puts output.pack("CCA#{msg.size}")
+          s.write output.pack("CCA#{msg.size}")
           loop {
             line =  s.gets
             p line
             break if line.nil?
           }
-
         end
 
       end
