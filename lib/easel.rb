@@ -71,7 +71,7 @@ def parse_ARGV
 
     opts.on("-o [FILE]", "--output [FILE]",  "Set a log file.") do |filename|
       begin
-        $config[:log_file] = File.new(filename, "a")
+        $config[:log_file] = File.new(filename, "w")
       rescue Exception => e
         log_error "Log file could not be open. Sending log to STDIN. Error message: #{e}"
       end
