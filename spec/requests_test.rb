@@ -18,8 +18,12 @@ describe "Request Tests" do
     before(:context) do
       # Create a new server on localhost:PORT (for every context)
       @server_pid = fork do
-        output = `#{__dir__}/../lib/easel.rb #{PATH_TO_YAML}`
+        fp = File.new("#{__dir__}/../out.log", "w")
+        fp.close # Empty out log file
+        output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../out.log -l 4 #{PATH_TO_YAML}`
+        puts "--------------------- SERVER OUTPUT ------------------------"
         puts output
+        puts "------------------------------------------------------------"
       end
       sleep 1 # Allow the server to set up.
     end
@@ -106,7 +110,8 @@ describe "Request Tests" do
                 "Upgrade: websocket\r\n" +
                 "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
                 "\r\n"
-        line = ""
+        line = s.gets
+         # expect(line).to eq("HTTP/1.1 101 Switching Protocols\r\n")
         loop do
           line = s.gets
           raise "No Sec-WebSocket-Accept field returned" if line.nil?
@@ -118,63 +123,71 @@ describe "Request Tests" do
         while line != "\r\n"
           line = s.gets
         end
-
         s.close
       end
 
       it "should be able to respond to 0:RUN within 500ms" do
 
-        fp = File.new("/home/epwr/projects/easel/out.txt", "w")
         s = TCPSocket.open("localhost", PORT)
+        expect(s.closed?).to eq(false)
         s.write "GET / HTTP/1.1\r\n" +
                 "Upgrade: websocket\r\n" +
                 "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
                 "\r\n"
-        fp.puts "here11111"
+        line = ""
+        expect(s.closed?).to eq(false)
         loop do
-          begin
-            line = s.gets
-          rescue Exception => e
-            fp.puts "Error: #{e}"
-            sleep 2
-            line = "garbage"
-          end
-          puts "LINE: '#{line}'"
+          expect(s.closed?).to eq(false)
+          line = s.gets
+          expect(s.closed?).to eq(false)
           raise "No Sec-WebSocket-Accept field returned" if line.nil?
           break if line.include? "Sec-WebSocket-Accept: "
         end
-        fp.puts "here2"
         expect(line.split(": ")[1]).to eq("HSmrc0sMlYUkAGmm5OPpG2HaGWk=\r\n")
 
-
-        fp.puts "hello"
-
-        line = s.gets
-        while line != "\r\n"
-          line = s.gets
+        lineAA = s.gets
+        while lineAA != "\r\n"
+          lineAA = s.gets
         end
 
         Timeout::timeout(0.5) do
           msg = "0:RUN"
-
-          fp.puts "0b10000000"
-          fp.puts "#{msg.size.to_s(2)}"
-          fp.puts "#{(0b10000000 | msg.size).to_s(2)}"
-          output = [0b10000001, (0b10000000 | msg.size), msg]
-          fp.puts output.pack("CCA#{msg.size}")
-          s.write output.pack("CCA#{msg.size}")
-          loop {
-            line =  s.gets
-            p line
-            break if line.nil?
+          mask = 4.times.map{ rand(125) }
+          output = [0b10000001, (0b10000000 | msg.size)]
+          mask.each_char { |byte| output << byte }
+          msg.bytes.each_with_index { |byte, i|
+            output << byte ^ mask[i % 4]
           }
+          s.write output.pack("CCA#{msg.size}")
+
+          lineBB =  s.gets
         end
 
+        s.close
+
       end
 
-      it "should stream the first DID command with 500ms of accepting the upgrade." do
-        fail
-      end
+      # it "should stream the first DID command with 500ms of accepting the upgrade." do
+      #   fail
+      # end
+
+      # it "should close the websocket properly when requested" do
+      # https://datatracker.ietf.org/doc/html/rfc6455#section-1.4
+
+      # it "should require all neccessary fields be present in the Upgrade request"
+      # https://datatracker.ietf.org/doc/html/rfc6455#section-4.2.1
+
+      # it "should require valid version of the websocket protocol"
+      # https://datatracker.ietf.org/doc/html/rfc6455#section-4.4
+
+      # it "should be able to receive large websocket messages" do
+      # https://datatracker.ietf.org/doc/html/rfc6455#section-5.2
+      # handle extended payload length (and extended payload length continued)
+
+
+
+
+
 
     end
 
