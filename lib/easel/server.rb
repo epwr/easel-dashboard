@@ -37,6 +37,7 @@ def launch_server
     log_info "Interrupt received, server shutting down..."
   rescue Exception => e
     log_error "Unexpected error occured and closed client connection. Error: #{e}"
+    e.backtrace.each { |trace| log_error "#{trace}" }
   end
 end
 
@@ -94,28 +95,27 @@ def handle_get(socket, request)
   case request[:url]
   when "/", "/index.html"
     socket.print build_app
-    socket.close
-  when "/test.html" # TODO: Remove this!
-    socket.print return_html "test.html"
-    socket.close
+    socket.close unless request[:Connection].is_a? String and request[:Connection].downcase == "keep-alive\r\n"
   when "/app.css"
     socket.print build_css
-    socket.close
+    socket.close unless request[:Connection].is_a? String and request[:Connection].downcase == "keep-alive\r\n"
   when "/controller.js"
     log_info "building controller"
     socket.print build_js
-    socket.close
+    socket.close unless request[:Connection].is_a? String and request[:Connection].downcase == "keep-alive\r\n"
   when "/dashboardElements.js"
     socket.print return_js 'dashboardElements.js'
-    socket.close
+    socket.close unless request[:Connection].is_a? String and request[:Connection].downcase == "keep-alive\r\n"
   when "/createComponents.js"
     socket.print return_js 'createComponents.js'
-    socket.close
+    socket.close unless request[:Connection].is_a? String and request[:Connection].downcase == "keep-alive\r\n"
   # TODO: respond with favicon
   else
     socket.print build_error 404
-    socket.close
+    socket.close unless request[:Connection].is_a? String and request[:Connection].downcase == "keep-alive\r\n"
   end
+
+  log_info "Handled HTTP request: #{request}"
 
 end
 

@@ -78,49 +78,51 @@ MAX_WS_FRAME_SIZE = 50.0  # Must be a float number to allow a non-truncated divi
 def run_websocket(socket, initial_request)
 
   accept_connection(socket, initial_request[:fields][:Sec_WebSocket_Key][0..-3])
+  log_info "Accepted WebSocket Connection"
   child_threads = {}
   send_msg_mutex = Mutex.new # One mutex per websocket to control sending messages.
 
   Thread.new {  # Periodically update the generic dashboard if set.
     loop do
-      log_error "DATA BRANCH: Right here and now"
       data = read_data
-      log_error "DATA BRANCH: Just a little bit later"
       send_msg(socket, send_msg_mutex, nil, "DASH", data)
-      log_error "DATA BRANCH: Just a bit more little bit later"
       sleep $config[:collect_data_period]
     end
   } unless $config[:collect_data_period] == 0
 
-  loop {
-    log_error "MAIN BRANCH: One"
-    msg = receive_msg socket
-    log_error "MAIN BRANCH: Two"
-    break if msg.nil? # The socket was closed by the client.
+  begin
+    loop {
+      msg = receive_msg socket
+      break if msg.nil? # The socket was closed by the client.
 
-    case msg.split(":")[0]
-    when "RUN"
-      cmd_id = msg.match(/^RUN:(.*)$/)[1].to_i
+      case msg.split(":")[1]
+      when "RUN"
+        cmd_id = msg.match(/^RUN:(.*)$/)[1].to_i
 
-      unless child_threads[cmd_id]
-        child_threads[cmd_id] = Thread.new do
-          run_command_and_stream(socket, cmd_id, send_msg_mutex)
+        unless child_threads[cmd_id]
+          child_threads[cmd_id] = Thread.new do
+            run_command_and_stream(socket, cmd_id, send_msg_mutex)
+            child_threads[cmd_id] = nil
+          end
+        end
+
+      when "STOP"
+
+        cmd_id = msg.match(/^STOP:(.*)$/)[1].to_i
+        unless child_threads[cmd_id].nil?
+          child_threads[cmd_id].kill
           child_threads[cmd_id] = nil
         end
+
+      else
+        log_error "Received an unrecognized message over the websocket: #{msg}"
       end
-
-    when "STOP"
-
-      cmd_id = msg.match(/^STOP:(.*)$/)[1].to_i
-      unless child_threads[cmd_id].nil?
-        child_threads[cmd_id].kill
-        child_threads[cmd_id] = nil
-      end
-
-    else
-      log_error "Received an unrecognized message over the websocket: #{msg}"
-    end
-  }
+    }
+  rescue Exception => e
+    log_error "Wuh Woh #2: #{e}"
+    e.backtrace.each { |trace| log_error "#{trace}" }
+    raise e
+  end
 
 end
 
@@ -193,12 +195,14 @@ end
 
 # receive_msg
 #
-#
+# Extremely naive websocket server. Requires masking, and a message with a length
+# of at most 125. Needs to be updated to conform with RFC 6544
 def receive_msg socket
 
   # Check first two bytes
   byte1 = socket.getbyte
-  byte2 = socket.getbyte  # TODO: THESE ARE ALREADY NIL??????????
+  byte2 = socket.getbyte
+  raise "GOD FUCKING DAMN IT WHY (#{socket.closed?})" if byte1.nil? or byte2.nil?
   if byte1 == 0x88  # Client is requesting that we close the connection.
     # TODO: Unsure how to properly handle this case. Right now the socket will close and
     # everything here will shut down - eventually? Kill all child threads first?
@@ -211,29 +215,27 @@ def receive_msg socket
   msg_size = byte2 & 0b01111111
   is_masked = byte2 & 0b10000000
   unless fin and opcode == 1 and is_masked and msg_size < MAX_WS_FRAME_SIZE
-    print "byte1: "
-    p byte1
-    print "byte2: "
-    p byte2
-    puts "byte1: #{byte1.to_s(2)}"
-    puts "byte2: #{byte2.to_s(2)}"
-    puts "-- fin: #{fin}"
-    puts "opcode: #{opcode}"
-    puts "is_masked: #{is_masked}"
-    puts "msg_size: #{msg_size} (< #{MAX_WS_FRAME_SIZE})"
-
-    log_error "Invalid websocket message received. #{byte1.to_s(2)}-#{byte2.to_s(2)}"
-    puts socket.gets
-    msg_size.times.map { socket.getbyte }  # Read message from socket.
+    log_error "Invalid websocket message received. #{fin}, #{opcode == 1}, #{is_masked}, #{msg_size}"
+    msg_size.times { socket.getbyte }  # Read message from socket.
     return
   end
 
   # Get message
   mask = 4.times.map { socket.getbyte }
-  msg = msg_size.times.map { socket.getbyte }.each_with_index.map {
-    |byte, i| byte ^ mask[i % 4]
+  raise "Not Integer: fin       > #{fin      }" if not fin.is_a? Integer
+  raise "Not Integer: msg_size  > #{msg_size }" if not msg_size.is_a? Integer
+  raise "Not Integer: opcode    > #{opcode   }" if not opcode.is_a? Integer
+  raise "Not Integer: is_masked > #{is_masked}" if not is_masked.is_a? Integer
+  raise "Not aRRAY: mask      > #{mask     }" if not mask.is_a? Array
+  msg = msg_size.times.map { socket.getbyte }.each_with_index.map { |byte, i|
+    byte ^ mask[i % 4]
   }.pack('C*').force_encoding('utf-8').inspect
+
+  log_info "WebSocket received: #{msg}"
+
   msg[1..-2] # Remove quotation marks from message
+
+
 
 end
 
@@ -242,7 +244,6 @@ end
 #
 #
 def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
-
 
   case msg_type
   when "OUT", "ERR" # See comments at the top of the file to explain this part of the protocol.
@@ -313,6 +314,8 @@ def send_msg(socket, send_msg_mutex, cmd_id, msg_type, msg=nil)
     log_error "Trying to send a websocket message with unrecognized type: #{msg_type}"
   end
 
+  log_info "Message sent via WebSocket: #{msg}"
+
 end
 
 # send_frame
@@ -322,6 +325,7 @@ end
 # this function).
 # TODO: Figure out the proper frame size (MAX_WS_FRAME_SIZE).
 def send_frame(socket, msg)
+
   output = [0b10000001, msg.size, msg]
   begin
     socket.write output.pack("CCA#{msg.size}")
