@@ -20,10 +20,7 @@ describe "Request Tests" do
       @server_pid = fork do
         fp = File.new("#{__dir__}/../out.log", "w")
         fp.close # Empty out log file
-        output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../out.log -l 4 #{PATH_TO_YAML}`
-        puts "--------------------- SERVER OUTPUT ------------------------"
-        puts output
-        puts "------------------------------------------------------------"
+        output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../out.log -l 3 #{PATH_TO_YAML}`
       end
       sleep 1 # Allow the server to set up.
     end
@@ -58,13 +55,8 @@ describe "Request Tests" do
                 "Accept: text/javascript\r\n" +
                 "Accept-Language: en-gb;q=0.8, en;q=0.7\r\n" +
                 "\r\n\r\n"
-        lines = []
         line = s.gets
-        until line.nil?
-          lines << line
-          line = s.gets
-        end
-        expect(lines[0]).to eq("HTTP/1.1 200 OK\r\n")
+        expect(line).to eq("HTTP/1.1 200 OK\r\n")
         s.close
       end
 
@@ -74,13 +66,8 @@ describe "Request Tests" do
                 "Accept: text/javascript\r\n" +
                 "Accept-Language: en-gb;q=0.8, en;q=0.7\r\n" +
                 "\r\n\r\n"
-        lines = []
         line = s.gets
-        until line.nil?
-          lines << line
-          line = s.gets
-        end
-        expect(lines[0]).to eq("HTTP/1.1 200 OK\r\n")
+        expect(line).to eq("HTTP/1.1 200 OK\r\n")
         s.close
       end
 
@@ -90,15 +77,16 @@ describe "Request Tests" do
                 "Accept: text/javascript\r\n" +
                 "UglyField: bad:bad:bad:value" +
                 "\r\n\r\n"
-        lines = []
         line = s.gets
-        until line.nil?
-          lines << line
-          line = s.gets
-        end
-        expect(lines[0]).to eq("HTTP/1.1 200 OK\r\n")
+        expect(line).to eq("HTTP/1.1 200 OK\r\n")
         s.close
       end
+
+      # it "should keep tcp open when sent HTTP messages with appropriate header fields" do
+
+      # it "should close tcp when sent HTTP messages with appropriate header fields" do
+
+
     end
 
 
@@ -129,20 +117,18 @@ describe "Request Tests" do
       it "should be able to respond to 0:RUN within 500ms" do
 
         s = TCPSocket.open("localhost", PORT)
-        expect(s.closed?).to eq(false)
         s.write "GET / HTTP/1.1\r\n" +
                 "Upgrade: websocket\r\n" +
                 "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n" +
                 "\r\n"
         line = ""
-        expect(s.closed?).to eq(false)
         loop do
-          expect(s.closed?).to eq(false)
           line = s.gets
-          expect(s.closed?).to eq(false)
+          puts "-->> #{line}"
           raise "No Sec-WebSocket-Accept field returned" if line.nil?
           break if line.include? "Sec-WebSocket-Accept: "
         end
+
         expect(line.split(": ")[1]).to eq("HSmrc0sMlYUkAGmm5OPpG2HaGWk=\r\n")
 
         lineAA = s.gets
@@ -150,15 +136,17 @@ describe "Request Tests" do
           lineAA = s.gets
         end
 
-        Timeout::timeout(0.5) do
+        Timeout::timeout(0.5) do  # TODO: Change from 5 to 0.5
           msg = "0:RUN"
           mask = 4.times.map{ rand(125) }
           output = [0b10000001, (0b10000000 | msg.size)]
-          mask.each_char { |byte| output << byte }
+          mask.each { |byte| output << byte }
           msg.bytes.each_with_index { |byte, i|
-            output << byte ^ mask[i % 4]
+            output << (byte ^ mask[i % 4])
           }
-          s.write output.pack("CCA#{msg.size}")
+          print "--> "
+          p output
+          s.write output.pack("C6C#{msg.bytes.length}")
 
           lineBB =  s.gets
         end
