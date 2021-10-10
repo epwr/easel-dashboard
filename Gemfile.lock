@@ -1,0 +1,21 @@
+PATH
+  remote: .
+  specs:
+    easel-dashboard (0.5)
+      concurrent-ruby (= 1.1.9)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    concurrent-ruby (1.1.9)
+    rake (13.0.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  easel-dashboard!
+  rake (~> 13)
+
+BUNDLED WITH
+   2.1.4
