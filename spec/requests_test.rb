@@ -112,6 +112,7 @@ describe "Request Tests" do
           line = s.gets
         end
         s.close
+        sleep 0.5 # TCP Server is sending a reset insteand of closing and then reopening unless there's a delay.
       end
 
       it "should be able to respond to 0:RUN within 500ms" do
@@ -171,11 +172,6 @@ describe "Request Tests" do
       # it "should be able to receive large websocket messages" do
       # https://datatracker.ietf.org/doc/html/rfc6455#section-5.2
       # handle extended payload length (and extended payload length continued)
-
-
-
-
-
 
     end
 

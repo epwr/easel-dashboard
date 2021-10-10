@@ -82,17 +82,29 @@ def run_websocket(socket, initial_request)
   child_threads = {}
   send_msg_mutex = Mutex.new # One mutex per websocket to control sending messages.
 
+
   Thread.new {  # Periodically update the generic dashboard if set.
     loop do
-      data = read_data
-      send_msg(socket, send_msg_mutex, nil, "DASH", data)
+      #begin
+        data = read_data
+        send_msg(socket, send_msg_mutex, nil, "DASH", data)
+      #rescue Errno::EPIPE
+      #  log_info "Pipe closed erorr while sending periodic data to client"
+      #  break
+      #end
       sleep $config[:collect_data_period]
     end
   } unless $config[:collect_data_period] == 0
 
   begin
     loop {
-      msg = receive_msg socket
+      begin
+        msg = receive_msg socket
+      rescue Errno::ECONNRESET => e
+        log_error "Client reset the connection"
+        socket.close
+        msg = nil
+      end
       break if msg.nil? # The socket was closed by the client.
 
       case msg.split(":")[1]
@@ -202,7 +214,7 @@ def receive_msg socket
   # Check first two bytes
   byte1 = socket.getbyte
   byte2 = socket.getbyte
-  raise "GOD FUCKING DAMN IT WHY (#{socket.closed?})" if byte1.nil? or byte2.nil?
+  return nil if byte1.nil? or byte2.nil?
   if byte1 == 0x88  # Client is requesting that we close the connection.
     # TODO: Unsure how to properly handle this case. Right now the socket will close and
     # everything here will shut down - eventually? Kill all child threads first?
@@ -329,7 +341,7 @@ def send_frame(socket, msg)
   output = [0b10000001, msg.size, msg]
   begin
     socket.write output.pack("CCA#{msg.size}")
-  rescue IOError
+  rescue IOError, Errno::EPIPE
     log_error "WebSocket is closed. Msg: #{msg}"
   end
 end
