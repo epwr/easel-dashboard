@@ -9,5 +9,6 @@ Gem::Specification.new do |s|
   s.files       = Dir['lib/*.rb'] + Dir['lib/html/*.erb'] + Dir['lib/easel/*.rb']
   s.homepage    = 'https://github.com/epwr/easel-dashboard'
   s.add_development_dependency 'rake', '~>13'
+  s.add_development_dependency 'rspec', '~>3'
   s.add_runtime_dependency 'concurrent-ruby', '=1.1.9'
 end
