@@ -1,4 +1,4 @@
-#!/snap/bin/ruby
+#!/bin/env ruby
 #
 # Author: Eric Power
 
