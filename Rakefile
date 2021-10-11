@@ -29,7 +29,7 @@ namespace "gem" do
 
   desc 'Validates that the version number is appropriately set (v=X.X)'
   task :validate_version do
-    if ENV['v'].nil? or not ENV['v'].match(/^\d+\.\d+$/)
+    if ENV['v'].nil? or not ENV['v'].match(/^\d+[\.\d+]+$/)
       raise "Error: `rake create_gemspec` requires a version number."
     end
   end
@@ -52,6 +52,7 @@ namespace "gem" do
     gemspec.puts "  s.homepage    = 'https://github.com/epwr/easel-dashboard'"
     gemspec.puts "  s.add_development_dependency 'rake', '~>13'"
     gemspec.puts "  s.add_development_dependency 'rspec', '~>3'"
+    gemspec.puts "  s.add_development_dependency 'simplecov', '>0.21'"
     gemspec.puts "  s.add_runtime_dependency 'concurrent-ruby', '=1.1.9'"
     gemspec.puts "end"
     gemspec.close

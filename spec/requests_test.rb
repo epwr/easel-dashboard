@@ -125,7 +125,6 @@ describe "Request Tests" do
         line = ""
         loop do
           line = s.gets
-          puts "-->> #{line}"
           raise "No Sec-WebSocket-Accept field returned" if line.nil?
           break if line.include? "Sec-WebSocket-Accept: "
         end

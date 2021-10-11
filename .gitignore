@@ -1,2 +1,4 @@
 *.gem
 .rspec
+docs/testing/coverage/*
+out.log
