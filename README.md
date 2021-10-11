@@ -30,9 +30,10 @@ in `~/.gem/bin/` so if you're having any errors, add that to your PATH.
 
 ## Notes About the Current State
 
-Easel is currently v0.4! At this point, it works! While the UI/UX is not polished,
-and there's lots of features that I want to add before I think of Easel as a fully
-functioning prototype, you can easily install and run it on any server you want!
+Easel is currently v0.6! At this point, you can make Easel Dashboard do a lot of
+things. The two main limiters are that there isn't a mobile-friend view, and the
+only graphical interface is a time-series graph. Improvements to both are coming
+soon!
 
 ## A Roadmap?
 
@@ -67,24 +68,20 @@ features that I want to release, and a sequence for which features come next.
       - Add in a default 'dashboard' page that shows common stats about the server
         such as CPU usage, network usage, memory usage, uptime, and maybe
         some maximums (and minimums) of those.
-  - *v0.6: A 4, no 6, no 12 billion dollar pipeline!*
-      - Implement a proper CI/CD pipeline. CD being delivery (publish a package
-        on GitHub) not deployment.
-      - Implement building binaries as part of the push to main (look at Ruby
-        Packer). Have these be released as pre-releases.
-      - Look into Circleci and Jenkins.
-      - Benchmark testing: web page size (minimize this), time to accepting
-        connections (launch time), HTTP message handling time.
-      - Add "use strict" to all the javascript;
+  - *v0.6: A 4, no 6, no 12 billion dollar pipeline! -- RELEASED*
+      - Implement a CI/CD pipeline
   - *v0.7: Refactor to speed up pushing features.*
       - Refactor the client side JS (and likely the html.erb) to set up adding
         new graph types easily. See notes in app.js.erb for some preliminary ideas.
       - Refactor the server side code to have a clearer distribution of code, and
         to allow for more complex data types in a graphical dashboard.
+      - Add "use strict" to all the javascript;
   - *v0.8: Documentation for Users*
       - Add documentation on how to install Easel, and how to use it. This includes
         examples of YAML files, and explanations of the different YAML fields that are
         accepted.
+  - *v0.9: Deploying Binaries*
+      - Use Ruby Packer in a GitHub workflow to build binaries for Windows/Mac/Linux.
   - *v0.9: YAML Validation (because silent errors suck)*
       - Add YAML validation (check that all fields are valid, error on invalid fields).
       - Ensure YAML Errors include line number from the YAML file.
