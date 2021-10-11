@@ -16,7 +16,7 @@ PORT = 4200
 
 describe "Request Tests" do
 
-    before do
+    before(:all) do
       # Empty out the log file
       fp = File.new(PATH_TO_LOG, "w")
       fp.close
@@ -25,8 +25,11 @@ describe "Request Tests" do
     before(:context) do
       # Create a new server on localhost:PORT (for every context)
       @saved_ARGV = ARGV
+      @saved_VERBOSE = $VERBOSE
       @server = Thread.new{
+        $VERBOSE = nil
         ARGV = ["-o", PATH_TO_LOG, "-l", "3", "#{PATH_TO_YAML}"]
+        $VERBOSE = @saved_VERBOSE
         require_relative '../lib/easel.rb'
 
         # output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../docs/testing/testing.log -l 3 #{PATH_TO_YAML}`
@@ -184,6 +187,8 @@ describe "Request Tests" do
    after(:context) do
      # Kill the server after every context.
      @server.kill
+     $VERBOSE = nil
      ARGV = @saved_ARGV
+     $VERBOSE = @saved_VERBOSE
    end
 end
