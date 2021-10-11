@@ -28,9 +28,10 @@ describe "Request Tests" do
       @saved_VERBOSE = $VERBOSE
       @server = Thread.new{
         $VERBOSE = nil
-        ARGV = ["-o", PATH_TO_LOG, "-l", "3", "#{PATH_TO_YAML}"]
+        ARGV = [ "-o", "#{PATH_TO_LOG}", "-l", "3", "#{PATH_TO_YAML}"]
         $VERBOSE = @saved_VERBOSE
         require_relative '../lib/easel.rb'
+        launch
 
         # output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../docs/testing/testing.log -l 3 #{PATH_TO_YAML}`
       }

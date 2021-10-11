@@ -23,17 +23,17 @@
 require 'thread'
 require 'concurrent'
 
-# Key Variables
-@collected_data = {}
-@writers_semaphore = Concurrent::Semaphore.new(0)  # Used to count currently active writers
-@readers_semaphore = Concurrent::Semaphore.new(0)  # Used to count currently active readers
-@join_mutex = Mutex.new
-
 # launch_data_collection
 #
 # Launch a background thread to start collecting system info in the background.
 def launch_data_collection
   Thread.new do
+
+    @collected_data = {}
+    @writers_semaphore = Concurrent::Semaphore.new(0)  # Used to count currently active writers
+    @readers_semaphore = Concurrent::Semaphore.new(0)  # Used to count currently active readers
+    @join_mutex = Mutex.new
+
     loop do
       collect_data
       sleep $config[:collect_data_period]
