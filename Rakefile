@@ -29,13 +29,13 @@ namespace "gem" do
 
   desc 'Validates that the version number is appropriately set (v=X.X)'
   task :validate_version do
-    if ENV['v'].nil? or not ENV['v'].match(/^\d+\.\d+$/)
+    if ENV['v'].nil? or not ENV['v'].match(/^\d+[\.\d+]+$/)
       raise "Error: `rake create_gemspec` requires a version number."
     end
   end
 
   desc "Builds the .gemspec file."
-  task :gemspec => %w[validate_version] do
+  task :spec => %w[validate_version] do
     # Expect ARGV to be the version number
 
     gemspec = File.new("easel.gemspec", "w")
@@ -52,14 +52,20 @@ namespace "gem" do
     gemspec.puts "  s.homepage    = 'https://github.com/epwr/easel-dashboard'"
     gemspec.puts "  s.add_development_dependency 'rake', '~>13'"
     gemspec.puts "  s.add_development_dependency 'rspec', '~>3'"
+    gemspec.puts "  s.add_development_dependency 'simplecov', '>0.21'"
     gemspec.puts "  s.add_runtime_dependency 'concurrent-ruby', '=1.1.9'"
     gemspec.puts "end"
     gemspec.close
   end
 
   desc "builds a gem based on the gemspec."
-  task :build => %w[validate_version] do
+  task :build do
     sh "gem build easel.gemspec"
+  end
+
+  desc "installs the easel gem locally"
+  task :install => %w[validate_version] do
+    sh "sudo gem install easel-dashboard-#{ENV['v']}.gem"
   end
 
   desc "pushes a gem to rubygems.org"
@@ -73,4 +79,5 @@ namespace "gem" do
       sh "rm " + file
     }
   end
+
 end

@@ -109,7 +109,7 @@ def run_websocket(socket, initial_request)
 
       case msg.split(":")[1]
       when "RUN"
-        cmd_id = msg.match(/^RUN:(.*)$/)[1].to_i
+        cmd_id = msg.match(/^(.*):RUN$/)[1].to_i
 
         unless child_threads[cmd_id]
           child_threads[cmd_id] = Thread.new do
