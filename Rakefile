@@ -7,6 +7,22 @@ task :run do
   sh "./lib/easel.rb ./docs/examples/dash-1.yaml"
 end
 
+desc "Run all test files"
+task :test do
+  sh "rspec spec/*"
+end
+
+desc "Kill any running server instances"
+task :kill do
+  pid_strs = `lsof -i | grep localhost | sed 's|^ruby\\s*\\([[:digit:]]*\\).*$|\\1|'`
+  pids = pid_strs.split("\n").uniq.map { |pid| pid.to_i }
+  pids.each { |pid|
+    Process.kill "INT", pid
+  }
+  puts "Killed #{pids.length} processes."
+end
+
+
 task :clean
 
 namespace "gem" do
@@ -31,6 +47,7 @@ namespace "gem" do
     gemspec.puts "  s.summary     = 'An easier way to manage your server.'"
     gemspec.puts "  s.authors     = ['Eric Power']"
     gemspec.puts "  s.email       = 'ericpower@outlook.com'"
+    gemspec.puts "  s.required_ruby_version >= 2.0"
     gemspec.puts "  s.files       = Dir['lib/*.rb'] + Dir['lib/html/*.erb'] + Dir['lib/easel/*.rb']"
     gemspec.puts "  s.homepage    = 'https://github.com/epwr/easel-dashboard'"
     gemspec.puts "  s.add_development_dependency 'rake', '~>13'"

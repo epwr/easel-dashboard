@@ -1,4 +1,4 @@
-#!/snap/bin/ruby
+#!/bin/env ruby
 #
 # Author: Eric Power
 #
@@ -68,23 +68,23 @@ $config = {
               regex: ", (\\d+.\\d+)\\n"
             }
           ]
-        },
-        {
-          name: "Memory",
-          type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
-          data: [
-            {
-              cmd:   "free",
-              name:  "Total Memory",
-              regex: "Mem:\\W+(\\d+)"
-            },
-            {
-              cmd:   "free",
-              name:  "Free Memory",
-              regex: "Mem:\\W+\\d+\\W+(\\d+)"
-            }
-          ]
-        }
+        }#,
+        # {
+        #   name: "Memory",
+        #   type: "time-series",  # uses Time.now.strftime("%H:%M") as x asix.
+        #   data: [
+        #     {
+        #       cmd:   "free",
+        #       name:  "Total Memory",
+        #       regex: "Mem:\\W+(\\d+)"
+        #     },
+        #     {
+        #       cmd:   "free",
+        #       name:  "Free Memory",
+        #       regex: "Mem:\\W+\\d+\\W+(\\d+)"
+        #     }
+        #   ]
+        # }
       ]
     }
   ]

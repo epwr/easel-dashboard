@@ -63,12 +63,13 @@ features that I want to release, and a sequence for which features come next.
   - *v0.4: Easy Install -- RELEASED*
       - Let Easel be installed via one command. Possibly as a ruby gem, possibly
         with some other package manager, possibly with an install script.
-  - *v0.5: A Real Dashboard*
+  - *v0.5: A Real Dashboard -- RELEASED*
       - Add in a default 'dashboard' page that shows common stats about the server
         such as CPU usage, network usage, memory usage, uptime, and maybe
         some maximums (and minimums) of those.
   - *v0.6: A 4, no 6, no 12 billion dollar pipeline!*
-      - Implement a proper CI/CD pipeline.
+      - Implement a proper CI/CD pipeline. CD being delivery (publish a package
+        on GitHub) not deployment.
       - Implement building binaries as part of the push to main (look at Ruby
         Packer). Have these be released as pre-releases.
       - Look into Circleci and Jenkins.

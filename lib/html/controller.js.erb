@@ -118,9 +118,9 @@ function toggle_run(id){
     return;
   }
   if (tDash.isRunning) { // TODO: Move into the Dashboard Class.
-    webSocket.send("STOP:" + id);
+    webSocket.send(id + ":STOP");
   } else {
-    webSocket.send("RUN:" + id);
+    webSocket.send(id + ":RUN");
   }
   tDash.toggleRunning();
 }
