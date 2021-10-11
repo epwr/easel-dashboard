@@ -35,7 +35,7 @@ namespace "gem" do
   end
 
   desc "Builds the .gemspec file."
-  task :gemspec => %w[validate_version] do
+  task :spec => %w[validate_version] do
     # Expect ARGV to be the version number
 
     gemspec = File.new("easel.gemspec", "w")
@@ -59,8 +59,13 @@ namespace "gem" do
   end
 
   desc "builds a gem based on the gemspec."
-  task :build => %w[validate_version] do
+  task :build do
     sh "gem build easel.gemspec"
+  end
+
+  desc "installs the easel gem locally"
+  task :install => %w[validate_version] do
+    sh "sudo gem install easel-dashboard-#{ENV['v']}.gem"
   end
 
   desc "pushes a gem to rubygems.org"
@@ -74,4 +79,5 @@ namespace "gem" do
       sh "rm " + file
     }
   end
+
 end
