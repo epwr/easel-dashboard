@@ -21,6 +21,11 @@ require_relative 'easel/configuration'
 # arguments).
 def launch
 
+  # Allow tail recursion (to allow a more functional coding style)
+  RubyVM::InstructionSequence.compile_option = {
+    tailcall_optimization: true
+  }
+
   parse_ARGV
 
   # Load the provided YAML
