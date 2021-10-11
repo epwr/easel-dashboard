@@ -15,15 +15,15 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 # CUSTOM ADDITIONS
-require 'simplecov'
-SimpleCov.start
-
-SimpleCov.start do
-  add_filter '/bin/'
-  add_filter '/docs/'
-end
-
-SimpleCov.coverage_dir 'docs/testing/coverage'
+# require 'simplecov'
+# SimpleCov.start
+#
+# SimpleCov.start do
+#   add_filter /^bin/
+#   add_filter /^docs/
+# end
+#
+# SimpleCov.coverage_dir 'docs/testing/coverage'
 # END OF CUSTOM ADDITIONS
 
 RSpec.configure do |config|

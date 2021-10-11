@@ -11,17 +11,26 @@ require 'timeout'
 
 # Key Variables
 PATH_TO_YAML = "#{__dir__}/../docs/examples/dash-1.yaml"
+PATH_TO_LOG = "docs/testing/testing.log"
 PORT = 4200
 
 describe "Request Tests" do
 
+    before do
+      # Empty out the log file
+      fp = File.new(PATH_TO_LOG, "w")
+      fp.close
+    end
+
     before(:context) do
       # Create a new server on localhost:PORT (for every context)
-      @server_pid = fork do
-        fp = File.new("#{__dir__}/../out.log", "w")
-        fp.close # Empty out log file
-        output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../out.log -l 3 #{PATH_TO_YAML}`
-      end
+      @saved_ARGV = ARGV
+      @server = Thread.new{
+        ARGV = ["-o", PATH_TO_LOG, "-l", "3", "#{PATH_TO_YAML}"]
+        require_relative '../lib/easel.rb'
+
+        # output = `#{__dir__}/../lib/easel.rb -o #{__dir__}/../docs/testing/testing.log -l 3 #{PATH_TO_YAML}`
+      }
       sleep 1 # Allow the server to set up.
     end
 
@@ -144,8 +153,6 @@ describe "Request Tests" do
           msg.bytes.each_with_index { |byte, i|
             output << (byte ^ mask[i % 4])
           }
-          print "--> "
-          p output
           s.write output.pack("C6C#{msg.bytes.length}")
 
           lineBB =  s.gets
@@ -176,6 +183,7 @@ describe "Request Tests" do
 
    after(:context) do
      # Kill the server after every context.
-     Process.kill "INT", @server_pid
+     @server.kill
+     ARGV = @saved_ARGV
    end
 end
