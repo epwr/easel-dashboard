@@ -51,6 +51,7 @@ namespace "gem" do
     gemspec.puts "  s.files       = Dir['lib/*.rb'] + Dir['lib/html/*.erb'] + Dir['lib/easel/*.rb']"
     gemspec.puts "  s.homepage    = 'https://github.com/epwr/easel-dashboard'"
     gemspec.puts "  s.add_development_dependency 'rake', '~>13'"
+    gemspec.puts "  s.add_development_dependency 'rspec', '~>3'"
     gemspec.puts "  s.add_runtime_dependency 'concurrent-ruby', '=1.1.9'"
     gemspec.puts "end"
     gemspec.close
