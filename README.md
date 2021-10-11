@@ -82,6 +82,7 @@ features that I want to release, and a sequence for which features come next.
         accepted.
   - *v0.9: Deploying Binaries*
       - Use Ruby Packer in a GitHub workflow to build binaries for Windows/Mac/Linux.
+      - Look into Ubuntu PPAs and if it's worth offering one.
   - *v0.9: YAML Validation (because silent errors suck)*
       - Add YAML validation (check that all fields are valid, error on invalid fields).
       - Ensure YAML Errors include line number from the YAML file.
