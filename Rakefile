@@ -47,10 +47,11 @@ namespace "gem" do
     gemspec.puts "  s.summary     = 'An easier way to manage your server.'"
     gemspec.puts "  s.authors     = ['Eric Power']"
     gemspec.puts "  s.email       = 'ericpower@outlook.com'"
-    gemspec.puts "  s.required_ruby_version >= 2.0"
+    gemspec.puts "  s.required_ruby_version = '>= 2.6'"
     gemspec.puts "  s.files       = Dir['lib/*.rb'] + Dir['lib/html/*.erb'] + Dir['lib/easel/*.rb']"
     gemspec.puts "  s.homepage    = 'https://github.com/epwr/easel-dashboard'"
     gemspec.puts "  s.add_development_dependency 'rake', '~>13'"
+    gemspec.puts "  s.add_development_dependency 'rspec', '~>3'"
     gemspec.puts "  s.add_runtime_dependency 'concurrent-ruby', '=1.1.9'"
     gemspec.puts "end"
     gemspec.close
