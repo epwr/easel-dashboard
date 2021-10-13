@@ -21,13 +21,17 @@ require_relative 'easel/configuration'
 # arguments).
 def launch
 
-  # Allow tail recursion (to allow a more functional coding style)
-  RubyVM::InstructionSequence.compile_option = {
-    tailcall_optimization: true
-  }
-
   parse_ARGV
 
+  # Allow tail recursion (to allow a more functional coding style)
+  begin
+    RubyVM::InstructionSequence.compile_option = {
+      tailcall_optimization: true
+    }
+  rescue NameError  # Program is not running on the MRI
+    log_error "Tail call optimization is turned off (not running on the MRI). Easel Dashboard will require more memory."
+  end
+  
   # Load the provided YAML
   overwrite_config $config[:yaml_file]
   log_info("YAML loaded successfully (from: #{$config[:yaml_file]})")
