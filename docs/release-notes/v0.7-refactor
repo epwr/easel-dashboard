@@ -1,0 +1,49 @@
+The goal with v0.7 is a refactor of both the front and back ends. Currently, the
+structure makes some sense, but is not well suited to quickly releasing features
+because it was coded in an exploratory manner. I didn't know enough to design it
+before starting, so I started and now need to design the codebase.
+
+A rough map for the new backend structure:
+
+                                                     _______________
+              Only the data handling process        |               |
+              interacts with the data store  -->    |  Data Store   |
+                                                    |   (SQLite3)   |
+                                                    |_______________|
+
+                                                             ^ |
+                                                   |         | |
+                                                   |         | v
+                                                   |       __________
+                                                   |      |          |
+                            _________              |      |          |
+    Succesful WebSocket    |         |             |      |   Data   |
+    upgrades are passed    |   Web   |             |      | Handling |
+    to the WS handler      | Socket  |  -------------->   | Process  |
+                    |      | Handler |  <--------------   |          |
+                    |      |_________|             |      |__________|
+     ________       |           ^                  |
+    |        |      |-------->  |                  |
+--> |        |                  |                  |
+--> |   TCP  |              ________
+--> | Server |  ---------> |        |              ^
+--> |        |             |        |              |
+    |________|       ^     |  HTTP  |              |
+ ^                   |     | Server |              |-- Data Handling is in a
+ |                   |     |        |                  separate process, that
+ |                   |     |________|                  only communicates via
+ |                   |                                 pipes
+ |                   |
+ |                   |_____ TCP Connections are handled by their own thread,
+ |                          Which handles HTTP requests only.
+ |
+ |___ new tcp connections
+      come in.
+
+Along with this change, Easel needs a few other backend improvements:
+
+    1. The messages sent over the websockets should be JSON objects. This
+       requires a fully featured websocket messaging service on the server
+       side.
+
+    2. 
