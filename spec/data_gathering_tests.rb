@@ -9,52 +9,33 @@
 
 # Imports
 require 'timeout'
+require_relative '../lib/easel/data_gathering.rb'
 
 # Key Variables
 $config = {
   logging: 0  # Turn off logging output.
 }
 
-describe "WebSocket Server" do
+describe "DataGathering Process" do
 
   before(:context) do
-    @data_handler = nil # TODO:
+    @dh_ractor = launch_data_collection
+  end
 
+  context "Basic messaging" do
+
+    it "should accept a writable pipe and write 'Accepted\n' to it." do
+      r, w = IO.pipe
+      @dh_ractor.send(w)
+      expect(r.gets).to eq("Accepted\n")
+    end
+
+    it "should accept an Array with a [writable, readable] pipes and write 'Accepted\n' to it." do
+      r, w = IO.pipe
+      @dh_ractor.send(w)
+      expect(r.gets).to eq("Accepted\n")
+    end
 
   end
 
-
-  context "The Websocket Server" do
-
-    it "should register a new pipe with the data handling process when a new connection is received" do
-
-    end
-
-    # it "should close the websocket properly when requested" do
-    #
-
-    # it "should require all neccessary fields be present in the Upgrade request"
-    # https://datatracker.ietf.org/doc/html/rfc6455#section-4.2.1
-
-    # it "should require valid version of the websocket protocol"
-    # https://datatracker.ietf.org/doc/html/rfc6455#section-4.4
-
-    # it "should be able to receive large websocket messages" do
-    # https://datatracker.ietf.org/doc/html/rfc6455#section-5.2
-    # handle extended payload length (and extended payload length continued)
-
-  end
-
-  context "The HTTP Server" do
-
-
-    end
-
-   after(:context) do
-     # Kill the server after every context.
-     @server.kill
-     $VERBOSE = nil
-     ARGV = @saved_ARGV
-     $VERBOSE = @saved_VERBOSE
-   end
 end
