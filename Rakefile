@@ -47,7 +47,7 @@ namespace "gem" do
   desc 'Validates that the version number is appropriately set (v=X.X)'
   task :validate_version do
     if ENV['v'].nil? or not ENV['v'].match(/^\d+[\.\d+]+$/)
-      raise "Error: `rake create_gemspec` requires a version number."
+      raise "Error: the task requires a version number (set with 'v=X.X')."
     end
   end
 
