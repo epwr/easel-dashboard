@@ -22,8 +22,25 @@ task :kill do
   puts "Killed #{pids.length} processes."
 end
 
+namespace "test" do
 
-task :clean
+  desc "Run the data_gathering_tests.rb"
+  task :data_gathering do
+    sh "rspec spec/data_gathering_tests.rb"
+  end
+
+  desc "Run the requests_test.rb"
+  task :requests do
+    sh "rspec spec/requests_test.rb"
+  end
+
+  desc "Run the websocket_server_test.rb"
+  task :websocket_server do
+    sh "rspec spec/websocket_server_test.rb"
+  end
+
+end
+
 
 namespace "gem" do
 
