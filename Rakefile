@@ -54,6 +54,7 @@ namespace "gem" do
     gemspec.puts "  s.add_development_dependency 'rspec', '~>3'"
     gemspec.puts "  s.add_development_dependency 'simplecov', '>0.21'"
     gemspec.puts "  s.add_runtime_dependency 'concurrent-ruby', '=1.1.9'"
+    gemspec.puts "  s.add_runtime_dependency 'sqlite3', '>=1.4'"
     gemspec.puts "end"
     gemspec.close
   end
